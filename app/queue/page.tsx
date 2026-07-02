@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase'
 import { money } from '@/lib/calculations'
 import { updateStatus, addLunch } from '@/app/actions'
 import StatusBadge from '@/app/components/StatusBadge'
+import ErrorBanner from '@/app/components/ErrorBanner'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +11,7 @@ function submittedAt(value: string) {
 }
 
 export default async function QueuePage() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('gmc_requests')
     .select('*')
     .not('status', 'in', '(Approved,Rejected)')
@@ -27,6 +28,8 @@ export default async function QueuePage() {
           <p className="lead">Mark requests as delivered, then approve them for reporting.</p>
         </div>
       </div>
+
+      {error && <ErrorBanner message="Couldn't load the queue. Please refresh, or check back shortly." />}
 
       <div className="card">
         <div className="table-wrap">
@@ -50,12 +53,12 @@ export default async function QueuePage() {
                         <summary className="hint" style={{ cursor: 'pointer' }}>No — add lunch</summary>
                         <form action={addLunch} style={{ marginTop: 10, minWidth: 200 }}>
                           <input type="hidden" name="id" value={r.id} />
-                          <label>Lunch Details</label>
-                          <textarea name="lunch_details" placeholder="Example: 6 x wraps, 2 x salads" />
-                          <label>Time of Lunch</label>
-                          <input type="time" name="lunch_time" />
-                          <label>Lunch Cost</label>
-                          <input type="number" step="0.01" min="0" name="lunch_cost" placeholder="0.00" required />
+                          <label htmlFor={`lunch_details_${r.id}`}>Lunch Details</label>
+                          <textarea id={`lunch_details_${r.id}`} name="lunch_details" placeholder="Example: 6 x wraps, 2 x salads" />
+                          <label htmlFor={`lunch_time_${r.id}`}>Time of Lunch</label>
+                          <input id={`lunch_time_${r.id}`} type="time" name="lunch_time" />
+                          <label htmlFor={`lunch_cost_${r.id}`}>Lunch Cost</label>
+                          <input id={`lunch_cost_${r.id}`} type="number" step="0.01" min="0" name="lunch_cost" placeholder="0.00" required />
                           <button className="secondary" type="submit" style={{ marginTop: 10 }}>Add Lunch</button>
                         </form>
                       </details>
@@ -78,7 +81,7 @@ export default async function QueuePage() {
                           <form action={updateStatus} className="actions">
                             <input type="hidden" name="id" value={r.id} />
                             <input type="hidden" name="status" value="Approved" />
-                            <input name="approved_by" placeholder="Approved by" />
+                            <input name="approved_by" placeholder="Approved by" aria-label="Approved by" />
                             <button className="success" type="submit">Approve</button>
                           </form>
                           <form action={updateStatus}>

@@ -9,15 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "latest",
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest"
+    "@supabase/supabase-js": "^2.108.2",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "recharts": "^3.9.1"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "typescript": "latest"
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.3"
   }
 }
