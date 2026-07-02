@@ -2,20 +2,34 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { money, formatDateWithDay } from '@/lib/calculations'
 import StatusBadge from './components/StatusBadge'
+import ErrorBanner from './components/ErrorBanner'
 
 export const dynamic = 'force-dynamic'
 
+function summarise(rows: any[]) {
+  const requests = rows.length
+  const rooms = rows.reduce((sum, r) => sum + Number(r.room_count || 0), 0)
+  const refreshments = rows.reduce((sum, r) => sum + Number(r.refreshment_total || 0), 0)
+  const lunches = rows.reduce((sum, r) => sum + Number(r.lunch_cost || 0), 0)
+  return { requests, rooms, refreshments, lunches, total: refreshments + lunches }
+}
+
 export default async function Dashboard() {
-  const { data: requests } = await supabase
+  const today = new Date().toISOString().slice(0, 10)
+
+  const { data: requests, error: recentError } = await supabase
     .from('gmc_requests')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(15)
 
+  const { data: todayRequests, error: todayError } = await supabase
+    .from('gmc_requests')
+    .select('room_count, refreshment_total, lunch_cost')
+    .eq('request_date', today)
+
   const rows = requests || []
-  const rooms = rows.reduce((sum, r) => sum + Number(r.room_count || 0), 0)
-  const refreshments = rows.reduce((sum, r) => sum + Number(r.refreshment_total || 0), 0)
-  const lunches = rows.reduce((sum, r) => sum + Number(r.lunch_cost || 0), 0)
+  const stats = summarise(todayRequests || [])
 
   return (
     <>
@@ -27,26 +41,30 @@ export default async function Dashboard() {
         <Link href="/new-request" className="btn">+ New Request</Link>
       </div>
 
+      {(recentError || todayError) && (
+        <ErrorBanner message="Some dashboard data couldn't be loaded. Please refresh, or check back shortly." />
+      )}
+
       <div className="grid stats">
         <div className="stat stat-indigo">
           <span className="stat-icon">📋</span>
-          <span className="stat-label">Recent requests</span>
-          <span className="stat-value">{rows.length}</span>
+          <span className="stat-label">Today's requests</span>
+          <span className="stat-value">{stats.requests}</span>
         </div>
         <div className="stat stat-cyan">
           <span className="stat-icon">🚪</span>
-          <span className="stat-label">Rooms serviced</span>
-          <span className="stat-value">{rooms}</span>
+          <span className="stat-label">Rooms serviced today</span>
+          <span className="stat-value">{stats.rooms}</span>
         </div>
         <div className="stat stat-amber">
           <span className="stat-icon">☕</span>
-          <span className="stat-label">Refreshments</span>
-          <span className="stat-value">{money(refreshments)}</span>
+          <span className="stat-label">Today's refreshments</span>
+          <span className="stat-value">{money(stats.refreshments)}</span>
         </div>
         <div className="stat stat-emerald">
           <span className="stat-icon">💷</span>
-          <span className="stat-label">Total revenue</span>
-          <span className="stat-value">{money(refreshments + lunches)}</span>
+          <span className="stat-label">Today's revenue</span>
+          <span className="stat-value">{money(stats.total)}</span>
         </div>
       </div>
 
