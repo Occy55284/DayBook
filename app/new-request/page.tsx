@@ -18,8 +18,8 @@ export default function NewRequestPage() {
           <label htmlFor="request_date">Date</label>
           <input id="request_date" type="date" name="request_date" defaultValue={today} required />
 
-          <label htmlFor="requestor_name">Requestor Name</label>
-          <input id="requestor_name" name="requestor_name" placeholder="Customer Service name" required />
+          <label htmlFor="requestor_name">Requestor Initials</label>
+          <input id="requestor_name" name="requestor_name" placeholder="e.g. AB" required />
 
           <label htmlFor="room_list">Room List — one room per line</label>
           <textarea id="room_list" name="room_list" placeholder={`3.05\n3.07\n4.06`} required />
