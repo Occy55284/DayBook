@@ -12,6 +12,7 @@ export default function MonthSelect({ months, selected }: { months: string[]; se
 
   return (
     <select
+      aria-label="Select month"
       value={selected}
       onChange={(e) => router.push(`/reports?month=${e.target.value}`)}
       style={{ width: 'auto' }}
