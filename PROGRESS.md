@@ -23,6 +23,34 @@ log after each working session so the project history stays current.
 
 ---
 
+## 2026-07-01 — Dashboard tweaks, lunch pricing fix, double-submit fix
+**Done**
+- Dashboard "Recent Requests" now shows 15 rows instead of 10, and dates
+  display with the day of week (e.g. `Wed, 01 Jul 2026`) via a new
+  `formatDateWithDay` helper in `lib/calculations.ts`. (PR #13)
+- Requests marked "Lunch required" (at submission or added later from the
+  Hospitality queue) no longer get the standard £3.40 per-room refreshment
+  charge, since lunch already covers it — `refreshment_total` is set to 0
+  in both `createRequest` and `addLunch`. Request detail page's room
+  breakdown updated to reflect £0 per room in that case. (PR #14)
+- Fixed a double-submission bug on the New Request form: the submit button
+  had no protection against double-clicks, so a second click before the
+  redirect completed could send a duplicate request. Added a `SubmitButton`
+  client component (`app/components/SubmitButton.tsx`) using
+  `useFormStatus` to disable the button and show "Submitting…" while
+  pending. Verified in-browser with Playwright. (PR #15)
+
+**In progress / next**
+- No feature work in flight.
+
+**Notes / decisions**
+- `main` had moved on since the last session (request detail pages,
+  `approved_by`, `created_at` ordering, `ROOM_PRICE` now £3.40) — the
+  Dashboard PR was rebased onto latest `main` before merging.
+- Each change shipped as its own PR (#13, #14, #15), all merged same day.
+
+---
+
 ## 2026-06-18 — UI overhaul (professional + vibrant)
 **Done**
 - Reworked `app/globals.css` into a design system: design tokens, vibrant
