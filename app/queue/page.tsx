@@ -81,7 +81,7 @@ export default async function QueuePage() {
                           <form action={updateStatus} className="actions">
                             <input type="hidden" name="id" value={r.id} />
                             <input type="hidden" name="status" value="Approved" />
-                            <input name="approved_by" placeholder="Approved by" aria-label="Approved by" />
+                            <input name="approved_by" placeholder="Approver initials" aria-label="Approver initials" />
                             <button className="success" type="submit">Approve</button>
                           </form>
                           <form action={updateStatus}>

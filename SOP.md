@@ -3,7 +3,7 @@
 **Document owner:** Hospitality / Customer Service Management
 **Applies to:** GMC Tracker web application
 **Last updated:** 2 July 2026
-**Version:** 1.0
+**Version:** 1.1
 
 ---
 
@@ -56,7 +56,7 @@ Only **Approved** requests appear in weekly/monthly totals and exports — this 
 1. Go to **New Request** in the top navigation.
 2. Fill in the form:
    - **Date** — defaults to today; change it if the request is for a different date.
-   - **Requestor Name** — your name (Customer Service).
+   - **Requestor Initials** — your initials (Customer Service), not your full name, per GDPR data minimisation.
    - **Room List** — one room number per line (e.g. `3.05`, `3.07`, `4.06` on separate lines). Each line is charged £3.40 unless lunch is required (see Section 4).
    - **Lunch required?** — tick this box only if lunch is being provided for this request. Ticking it removes the £3.40 refreshment charge for the rooms in this request.
    - **Lunch Details** — what's being provided (e.g. "6 x wraps, 2 x salads"). Only needed if lunch is required.
@@ -86,10 +86,10 @@ Only **Approved** requests appear in weekly/monthly totals and exports — this 
 
 ## 8. Procedure: Approving or Rejecting Requests (Manager / Supervisor)
 
-1. Go to **Hospitality Queue**. Requests with status **Delivered** will show two extra controls in the Action column: an **Approved by** field, an **Approve** button, and a **Reject** button.
+1. Go to **Hospitality Queue**. Requests with status **Delivered** will show two extra controls in the Action column: an **Approver initials** field, an **Approve** button, and a **Reject** button.
 2. Review the request details (rooms, lunch, total cost) to confirm it's correct and genuinely happened.
 3. **To approve:**
-   - Type your name into the **Approved by** field.
+   - Type your initials (not your full name, per GDPR data minimisation) into the **Approver initials** field.
    - Click **Approve**. The request moves to status Approved and now counts toward Reports/billing.
 4. **To reject:**
    - Click **Reject** if the request is a duplicate, was cancelled, or is otherwise incorrect and should not be billed.
@@ -117,7 +117,7 @@ Only **Approved** requests appear in weekly/monthly totals and exports — this 
 The **Dashboard** (home page) is the day-to-day operational snapshot, not a billing report — it includes requests of any status, not just Approved.
 
 - Four tiles at the top show **today's** requests, rooms serviced, refreshments revenue and total revenue (all statuses, so this includes things not yet approved).
-- The **Recent Requests** table below shows the 15 most recently submitted requests (any status, any date), with a link on the date and requestor name through to the full **Request Detail** page for that entry, where you can see the full room-by-room breakdown and approval history.
+- The **Recent Requests** table below shows the 15 most recently submitted requests (any status, any date), with a link on the date and requestor initials through to the full **Request Detail** page for that entry, where you can see the full room-by-room breakdown and approval history.
 - Use **+ New Request** at the top right as a shortcut to the New Request form.
 
 ---
@@ -160,14 +160,14 @@ Contact the app administrator (currently: Mark Graham).
 | Field | Meaning |
 |---|---|
 | Request Date | The date the room refreshments/lunch are needed for. |
-| Requestor Name | Who from Customer Service raised the request. |
+| Requestor Initials | The initials of who from Customer Service raised the request (full names are not collected, per GDPR). |
 | Room List | The room number(s) covered by this single request. |
 | Room Count | Auto-calculated from the Room List. |
 | Refreshment Total | £3.40 × room count, unless Lunch required is ticked (then £0.00). |
 | Lunch Required | Whether this request includes a lunch order. |
 | Lunch Cost | The cost of the lunch order (entered manually). |
 | Total | Refreshment Total + Lunch Cost. |
-| Approved By | The Manager/Supervisor who approved the request. |
+| Approver Initials | The initials of the Manager/Supervisor who approved the request (full names are not collected, per GDPR). |
 | Status | Submitted → Delivered → Approved (or Rejected). |
 
 ---
