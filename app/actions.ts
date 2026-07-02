@@ -76,10 +76,28 @@ export async function createRequest(formData: FormData) {
     throw new Error('Date, requestor and room list are required.')
   }
 
-  const { error } = await getSupabase().from('gmc_requests').insert(payload)
-  if (error) throw new Error(error.message)
+  const db = getSupabase()
 
-  await notifyHospitality(payload)
+  // Defense-in-depth against double-clicks, multiple tabs or network retries
+  // submitting the same request twice: skip the insert if an identical one
+  // was made moments ago, rather than creating a duplicate billable record.
+  const dedupeSince = new Date(Date.now() - 15_000).toISOString()
+  const { data: recentDuplicate } = await db
+    .from('gmc_requests')
+    .select('id')
+    .eq('requestor_name', payload.requestor_name)
+    .eq('room_list', payload.room_list)
+    .eq('request_date', payload.request_date)
+    .gte('created_at', dedupeSince)
+    .limit(1)
+    .maybeSingle()
+
+  if (!recentDuplicate) {
+    const { error } = await db.from('gmc_requests').insert(payload)
+    if (error) throw new Error(error.message)
+
+    await notifyHospitality(payload)
+  }
 
   revalidatePath('/')
   revalidatePath('/queue')
