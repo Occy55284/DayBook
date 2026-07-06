@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { money } from '@/lib/calculations'
+import { money, toInitials } from '@/lib/calculations'
 import { updateStatus, addLunch } from '@/app/actions'
 import StatusBadge from '@/app/components/StatusBadge'
 import ErrorBanner from '@/app/components/ErrorBanner'
@@ -43,7 +43,7 @@ export default async function QueuePage() {
               {rows.map((r) => (
                 <tr key={r.id}>
                   <td>{r.request_date}</td>
-                  <td>{r.requestor_name}</td>
+                  <td title={r.requestor_name}>{toInitials(r.requestor_name)}</td>
                   <td><pre>{r.room_list}</pre><strong>{r.room_count} rooms</strong></td>
                   <td>
                     {r.lunch_required ? (
@@ -84,9 +84,10 @@ export default async function QueuePage() {
                             <input name="approved_by" placeholder="Approver initials" aria-label="Approver initials" />
                             <button className="success" type="submit">Approve</button>
                           </form>
-                          <form action={updateStatus}>
+                          <form action={updateStatus} className="actions">
                             <input type="hidden" name="id" value={r.id} />
                             <input type="hidden" name="status" value="Rejected" />
+                            <input name="approved_by" placeholder="Rejected by (initials)" aria-label="Rejected by initials" />
                             <button className="danger" type="submit">Reject</button>
                           </form>
                         </>

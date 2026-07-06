@@ -113,6 +113,9 @@ export async function updateStatus(formData: FormData) {
   if (status === 'Approved') {
     updates.approved_by = approvedBy || 'Hospitality Manager / Supervisor'
     updates.approved_at = new Date().toISOString()
+  } else if (status === 'Rejected') {
+    updates.rejected_by = approvedBy || 'Hospitality Manager / Supervisor'
+    updates.rejected_at = new Date().toISOString()
   }
 
   const { error } = await getSupabase().from('gmc_requests').update(updates).eq('id', id)
