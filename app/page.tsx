@@ -82,7 +82,7 @@ export default async function Dashboard() {
                   <td><StatusBadge status={r.status} /></td>
                   <td>{r.approved_by || '—'}</td>
                   <td>{money(r.total_cost)}</td>
-                  <td><Link href={`/request/${r.id}`} className="btn secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>View →</Link></td>
+                  <td><Link href={`/requests/${r.id}`} className="btn secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>View →</Link></td>
                 </tr>
               ))}
               {!rows.length && <tr><td colSpan={7} className="empty">No requests yet. <Link href="/new-request">Create the first request</Link>.</td></tr>}
