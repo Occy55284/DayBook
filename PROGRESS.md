@@ -51,6 +51,25 @@ log after each working session so the project history stays current.
 
 ---
 
+## 2026-07-06 — Rejected status, request detail page, initials display
+**Done**
+- Added `Rejected` status to schema (migration run in Supabase).
+- Added `rejected_by` / `rejected_at` columns so rejections are tracked.
+- Reject button added to Delivered items in the queue (alongside Approve), each with an initials input.
+- Request detail page (`/requests/:id`) updated to show who rejected or approved and when.
+- Dashboard "View →" button fixed — was 404ing due to a stale route from a previous PR; now correctly links to `/requests/:id`.
+- Requestor names throughout dashboard and queue now show initials only (full name on hover).
+- `badge-rejected` (red) and `button.danger` styles added.
+
+**In progress / next**
+- No open items.
+
+**Notes / decisions**
+- Next.js 16 requires `params` to be awaited as a Promise; the duplicate `/request/[id]` page used the old sync pattern and was removed.
+- Migration SQL is in `supabase/migrations/20260706_add_rejected_status.sql`.
+
+---
+
 ## 2026-06-18 — UI overhaul (professional + vibrant)
 **Done**
 - Reworked `app/globals.css` into a design system: design tokens, vibrant
