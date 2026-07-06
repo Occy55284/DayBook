@@ -1,5 +1,14 @@
 export const ROOM_PRICE = 3.40
 
+export function toInitials(name: string | null | undefined): string {
+  if (!name) return '—'
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+}
+
 export function countRooms(roomList: string): number {
   return roomList
     .split('\n')

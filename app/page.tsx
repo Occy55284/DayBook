@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { money, formatDateWithDay } from '@/lib/calculations'
+import { money, formatDateWithDay, toInitials } from '@/lib/calculations'
 import StatusBadge from './components/StatusBadge'
 import ErrorBanner from './components/ErrorBanner'
 
@@ -72,19 +72,20 @@ export default async function Dashboard() {
         <h2>Recent Requests</h2>
         <div className="table-wrap">
           <table>
-            <thead><tr><th>Date</th><th>Requestor</th><th>Rooms</th><th>Status</th><th>Approved By</th><th>Total</th></tr></thead>
+            <thead><tr><th>Date</th><th>Requestor</th><th>Rooms</th><th>Status</th><th>Approved By</th><th>Total</th><th></th></tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id} className="row-link">
-                  <td><Link href={`/requests/${r.id}`}>{formatDateWithDay(r.request_date)}</Link></td>
-                  <td><Link href={`/requests/${r.id}`}>{r.requestor_name}</Link></td>
+                  <td>{formatDateWithDay(r.request_date)}</td>
+                  <td title={r.requestor_name}>{toInitials(r.requestor_name)}</td>
                   <td>{r.room_count}</td>
                   <td><StatusBadge status={r.status} /></td>
                   <td>{r.approved_by || '—'}</td>
                   <td>{money(r.total_cost)}</td>
+                  <td><Link href={`/request/${r.id}`} className="btn secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>View →</Link></td>
                 </tr>
               ))}
-              {!rows.length && <tr><td colSpan={6} className="empty">No requests yet. <Link href="/new-request">Create the first request</Link>.</td></tr>}
+              {!rows.length && <tr><td colSpan={7} className="empty">No requests yet. <Link href="/new-request">Create the first request</Link>.</td></tr>}
             </tbody>
           </table>
         </div>
