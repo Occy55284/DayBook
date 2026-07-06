@@ -36,8 +36,14 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           <table className="kv"><tbody>
             <tr><th>Status</th><td><StatusBadge status={request.status} /></td></tr>
             <tr><th>Requestor</th><td>{request.requestor_name}</td></tr>
-            <tr><th>Approved by</th><td>{request.approved_by || '—'}</td></tr>
-            <tr><th>Approved at</th><td>{request.approved_at ? new Date(request.approved_at).toLocaleString('en-GB') : '—'}</td></tr>
+            {request.status === 'Approved' && <>
+              <tr><th>Approved by</th><td>{request.approved_by || '—'}</td></tr>
+              <tr><th>Approved at</th><td>{request.approved_at ? new Date(request.approved_at).toLocaleString('en-GB') : '—'}</td></tr>
+            </>}
+            {request.status === 'Rejected' && <>
+              <tr><th>Rejected by</th><td>{request.rejected_by || '—'}</td></tr>
+              <tr><th>Rejected at</th><td>{request.rejected_at ? new Date(request.rejected_at).toLocaleString('en-GB') : '—'}</td></tr>
+            </>}
             <tr><th>Notes</th><td>{request.notes || '—'}</td></tr>
           </tbody></table>
         </div>
