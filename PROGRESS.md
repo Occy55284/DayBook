@@ -23,6 +23,32 @@ log after each working session so the project history stays current.
 
 ---
 
+## 2026-07-09 — GDPR full-name enforcement (requestor + approver) + auto progress log
+**Done**
+- Blocked full names on the New Request form: label updated to "Requestor Initials — no
+  surnames (GDPR)", `pattern="[^\s]+"` added client-side, and `createRequest` in
+  `actions.ts` rejects any name containing whitespace server-side. (PR #23)
+- Extended the same enforcement to the approver/rejecter field on the Queue page: both
+  `approved_by` inputs now carry the same pattern, `updateStatus` in `actions.ts` has a
+  matching server-side check, and the Dashboard "Approved By" column now uses `toInitials()`
+  so existing records with full names are masked. (PR #25)
+- Added `.claude/settings.json` with a `Stop` hook that auto-updates this file at end of
+  each session. Uses `asyncRewake` (exit 2) to re-invoke Claude when today's date is not
+  yet in the log; fires at most once per day. (PR #24)
+
+**In progress / next**
+- PR #25 (approver GDPR fix) open, Vercel preview ready — awaiting merge.
+- Possible follow-ups: CSV/Excel export on Reports, dark mode, mobile card layout for Queue.
+
+**Notes / decisions**
+- GDPR enforcement is two-layer (client `pattern` + server-side regex) on both name fields.
+- `toInitials()` in `lib/calculations.ts` acts as a display-layer fallback for any data
+  that pre-dates the enforcement.
+- The Stop hook lives in `.claude/settings.json` (committed) so it applies automatically to
+  all Claude Code sessions on this project.
+
+---
+
 ## 2026-07-01 — Dashboard tweaks, lunch pricing fix, double-submit fix
 **Done**
 - Dashboard "Recent Requests" now shows 15 rows instead of 10, and dates
