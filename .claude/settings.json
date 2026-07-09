@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "TODAY=$(date +%Y-%m-%d); if ! grep -q \"## $TODAY\" PROGRESS.md 2>/dev/null; then echo \"Session complete — please update PROGRESS.md now. Add a new entry at the very top of the log (below the ---) dated $TODAY, following the existing template: Done / In progress / Notes. Summarise what changed this session, what is still open, and any decisions made. Then commit and push the file.\"; exit 2; fi; exit 0",
+            "asyncRewake": true,
+            "rewakeSummary": "Update PROGRESS.md for today's session"
+          }
+        ]
+      }
+    ]
+  }
+}
