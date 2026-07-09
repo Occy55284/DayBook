@@ -81,13 +81,13 @@ export default async function QueuePage() {
                           <form action={updateStatus} className="actions">
                             <input type="hidden" name="id" value={r.id} />
                             <input type="hidden" name="status" value="Approved" />
-                            <input name="approved_by" placeholder="Approver initials" aria-label="Approver initials" />
+                            <input name="approved_by" placeholder="Approver initials" aria-label="Approver initials" pattern="[^\s]+" title="Initials only — no surnames (GDPR)" />
                             <button className="success" type="submit">Approve</button>
                           </form>
                           <form action={updateStatus} className="actions">
                             <input type="hidden" name="id" value={r.id} />
                             <input type="hidden" name="status" value="Rejected" />
-                            <input name="approved_by" placeholder="Rejected by (initials)" aria-label="Rejected by initials" />
+                            <input name="approved_by" placeholder="Rejected by (initials)" aria-label="Rejected by initials" pattern="[^\s]+" title="Initials only — no surnames (GDPR)" />
                             <button className="danger" type="submit">Reject</button>
                           </form>
                         </>

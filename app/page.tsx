@@ -80,7 +80,7 @@ export default async function Dashboard() {
                   <td title={r.requestor_name}>{toInitials(r.requestor_name)}</td>
                   <td>{r.room_count}</td>
                   <td><StatusBadge status={r.status} /></td>
-                  <td>{r.approved_by || '—'}</td>
+                  <td>{toInitials(r.approved_by)}</td>
                   <td>{money(r.total_cost)}</td>
                   <td><Link href={`/requests/${r.id}`} className="btn secondary" style={{ padding: '4px 10px', fontSize: '13px' }}>View →</Link></td>
                 </tr>

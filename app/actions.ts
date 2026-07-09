@@ -113,6 +113,10 @@ export async function updateStatus(formData: FormData) {
   const status = String(formData.get('status'))
   const approvedBy = String(formData.get('approved_by') || '').trim() || null
 
+  if (approvedBy && /\s/.test(approvedBy)) {
+    throw new Error('Approver must be initials only — no surnames (GDPR).')
+  }
+
   const updates: Record<string, any> = { status }
   if (status === 'Approved') {
     updates.approved_by = approvedBy || 'Hospitality Manager / Supervisor'
