@@ -76,6 +76,10 @@ export async function createRequest(formData: FormData) {
     throw new Error('Date, requestor and room list are required.')
   }
 
+  if (/\s/.test(payload.requestor_name)) {
+    throw new Error('Requestor must be a first name or initials only — no surnames (GDPR).')
+  }
+
   const db = getSupabase()
 
   // Defense-in-depth against double-clicks, multiple tabs or network retries
