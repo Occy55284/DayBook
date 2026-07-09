@@ -23,6 +23,29 @@ log after each working session so the project history stays current.
 
 ---
 
+## 2026-07-09 — GDPR name validation + auto PROGRESS.md hook
+**Done**
+- Blocked full names on the New Request form for GDPR compliance: label now
+  says "Requestor Initials — no surnames", browser enforces `pattern="[^\s]+"`
+  (no spaces), and `createRequest` in `actions.ts` rejects any name containing
+  whitespace server-side. (PR #23)
+- Added `.claude/settings.json` with a `Stop` hook that auto-updates this file
+  at the end of each session. It checks whether today's date already appears in
+  PROGRESS.md; if not, it rewakes Claude (asyncRewake exit 2) and prompts it to
+  write the entry and commit it. Fires once per day maximum. (PR #24)
+
+**In progress / next**
+- No feature work currently open.
+- Possible follow-ups noted previously: CSV/Excel export on Reports, dark mode,
+  mobile card layout for the Queue table.
+
+**Notes / decisions**
+- GDPR enforcement is two-layer (client + server) so it cannot be bypassed.
+- The Stop hook lives in `.claude/settings.json` (committed to the repo) so it
+  applies to all Claude Code sessions on this project automatically.
+
+---
+
 ## 2026-07-01 — Dashboard tweaks, lunch pricing fix, double-submit fix
 **Done**
 - Dashboard "Recent Requests" now shows 15 rows instead of 10, and dates
