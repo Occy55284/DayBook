@@ -34,10 +34,18 @@ export default function CalendarView() {
     setEditing(key);
     setText(trades[key] !== undefined ? String(trades[key]) : "");
   }
+  // Not empty, but not a real number either (e.g. just "-").
+  const invalid = text.trim() !== "" && Number.isNaN(parseFloat(text));
+  const isLoss = text.trim().startsWith("-");
+
+  // The phone number keypad has no minus key, so this button adds/removes it.
+  function toggleSign() {
+    const t = text.trim();
+    setText(t.startsWith("-") ? t.slice(1) : `-${t}`);
+  }
   function save() {
-    if (!editing) return;
-    const n = parseFloat(text);
-    setDay(editing, text.trim() === "" ? null : n);
+    if (!editing || invalid) return;
+    setDay(editing, text.trim() === "" ? null : parseFloat(text));
     setEditing(null);
   }
 
@@ -153,18 +161,33 @@ export default function CalendarView() {
         <div className="modal-bg" onClick={() => setEditing(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>{fromKey(editing).toDateString()}</h3>
-            <input
-              autoFocus
-              inputMode="decimal"
-              placeholder="Profit or loss, e.g. 41.10 or -12.50"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && save()}
-            />
+            <div className="amount-row">
+              <button
+                type="button"
+                className={`b-sign ${isLoss ? "loss" : "win"}`}
+                aria-label={isLoss ? "Loss. Tap to switch to profit" : "Profit. Tap to switch to loss"}
+                // Keep the keypad open: don't let the button steal focus from the box.
+                onPointerDown={(e) => e.preventDefault()}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={toggleSign}
+              >
+                {isLoss ? "−" : "+"}
+              </button>
+              <input
+                autoFocus
+                inputMode="decimal"
+                className={isLoss ? "neg" : ""}
+                placeholder="Amount, e.g. 41.10"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && save()}
+              />
+            </div>
+            {invalid && <p className="neg amount-hint">Enter a number, e.g. 41.10</p>}
             <div className="btns">
               <button className="b-cancel" onClick={() => setEditing(null)}>Cancel</button>
               <button className="b-clear" onClick={() => { setDay(editing, null); setEditing(null); }}>Clear</button>
-              <button className="b-save" onClick={save}>Save</button>
+              <button className="b-save" onClick={save} disabled={invalid}>Save</button>
             </div>
           </div>
         </div>
