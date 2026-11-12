@@ -2,6 +2,17 @@
 
 Newest entry first.
 
+## 2026-11-12 — Renamed to Daybook
+**Done**
+- App name is now Daybook: sign-in screen, browser tab title, README and package name.
+
+**Still manual (needs a computer)**
+- Vercel: Project → Settings → General → Project Name → `daybook`.
+- GitHub: repo → Settings → General → Repository name → `daybook`.
+
+**Next**
+- Win-rate ring and drawdown chart.
+
 ## 2026-11-12 — +/- button for losses
 **Done**
 - Entry box now has a +/- button next to the amount, because the phone number keypad has no minus key.

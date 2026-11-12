@@ -42,7 +42,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   return (
     <form className="login" onSubmit={signIn}>
-      <div className="title">PnL Tracker</div>
+      <div className="title">Daybook</div>
       <input type="email" placeholder="Email" autoComplete="email" required
         value={email} onChange={(e) => setEmail(e.target.value)} />
       <input type="password" placeholder="Password (min 6 characters)" autoComplete="current-password" required
