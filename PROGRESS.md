@@ -2,6 +2,16 @@
 
 Newest entry first.
 
+## 2026-11-12 — +/- button for losses
+**Done**
+- Entry box now has a +/- button next to the amount, because the phone number keypad has no minus key.
+- Green + for a profit, red − for a loss; the number turns red too. The keypad stays open when you tap it.
+- Save is blocked (with a hint) if the box holds something that isn't a number, e.g. just "-". Before, that silently cleared the day.
+
+**Next**
+- Win-rate ring and drawdown chart.
+- Rename the app to Daybook (Vercel project, GitHub repo, app title).
+
 ## 2026-11-12 — Analytics tab (first version)
 **Done**
 - Analytics tab now has a Week / Month / Year / All switch with arrows, like the Calendar.

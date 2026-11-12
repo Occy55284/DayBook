@@ -72,7 +72,7 @@ body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: flex-end; justify-content: center; z-index: 10; }
 .modal { background: var(--card); width: 100%; max-width: 480px; border-radius: 22px 22px 0 0; padding: 22px 18px calc(24px + env(safe-area-inset-bottom)); }
 .modal h3 { margin: 0 0 14px; font-size: 22px; }
-.modal input { width: 100%; font-size: 30px; font-weight: 700; padding: 14px; border-radius: 12px; border: 1px solid #374151; background: #0b1220; color: #fff; }
+.modal input { flex: 1; min-width: 0; width: 100%; font-size: 30px; font-weight: 700; padding: 14px; border-radius: 12px; border: 1px solid #374151; background: #0b1220; color: #fff; }
 .modal .btns { display: flex; gap: 10px; margin-top: 14px; }
 .modal .btns button { flex: 1; padding: 14px; border-radius: 12px; border: 0; font-size: 18px; font-weight: 700; }
 .b-save { background: var(--green); color: #052e16; }
@@ -90,3 +90,12 @@ body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .tiles .tile { font-size: 26px; font-weight: 800; margin-top: 6px; }
 .tiles small { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
 .chart { width: 100%; height: auto; display: block; margin-top: 8px; }
+
+/* Profit / loss sign button in the entry box */
+.amount-row { display: flex; gap: 10px; align-items: stretch; }
+.b-sign { width: 64px; flex: none; border: 0; border-radius: 12px; font-size: 34px; font-weight: 800; line-height: 1; }
+.b-sign.win { background: var(--green-dark); color: var(--green); }
+.b-sign.loss { background: var(--red-dark); color: var(--red); }
+.modal input.neg { color: var(--red); }
+.amount-hint { margin: 8px 2px 0; font-size: 14px; }
+.b-save:disabled { opacity: .4; }
