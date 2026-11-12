@@ -80,3 +80,8 @@ body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .b-cancel { background: transparent; color: var(--muted); }
 .title { text-align: center; font-size: 40px; font-weight: 800; margin: 8px 0 18px; }
 .soon { color: var(--muted); text-align: center; margin-top: 60px; font-size: 18px; }
+
+.login { display: flex; flex-direction: column; gap: 12px; max-width: 480px; margin: 0 auto; padding: 60px 16px; }
+.login input { font-size: 18px; padding: 14px; border-radius: 12px; border: 1px solid #374151; background: #0b1220; color: #fff; }
+.login button { padding: 14px; border-radius: 12px; border: 0; font-size: 18px; font-weight: 700; }
+.signout { width: 100%; padding: 14px; border-radius: 12px; border: 0; font-size: 18px; font-weight: 700; }

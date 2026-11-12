@@ -15,7 +15,7 @@ function sumPrefix(trades: Trades, prefix: string) {
 }
 
 export default function CalendarView() {
-  const { trades, setDay } = useTrades();
+  const { trades, setDay, error } = useTrades();
   const today = new Date();
   const [mode, setMode] = useState<Mode>("week");
   // Start on today, or the coming Sunday if today is Fri/Sat.
@@ -75,6 +75,7 @@ export default function CalendarView() {
         {mode === "all" ? <span style={{ width: 40 }} /> : <button onClick={() => step(1)} aria-label="Next">›</button>}
       </div>
 
+      {error && <p className="neg">{error}</p>}
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="label">Total P&amp;L</div>
         <div className={`big ${cls(total || undefined) || ""}`}>{money(total)}</div>

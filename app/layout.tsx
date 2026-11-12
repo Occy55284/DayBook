@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import TabBar from "@/components/TabBar";
+import AuthGate from "@/components/AuthGate";
 
 export const metadata: Metadata = {
   title: "PnL Tracker",
@@ -17,8 +18,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <div className="app">{children}</div>
-        <TabBar />
+        <AuthGate>
+          <div className="app">{children}</div>
+          <TabBar />
+        </AuthGate>
       </body>
     </html>
   );

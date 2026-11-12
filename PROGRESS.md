@@ -8,7 +8,7 @@ Newest entry first.
 - Next.js (TypeScript) app with a dark theme and bottom tabs: Calendar, Analytics, Settings.
 - Calendar with Week / Month / Year / All views. Weeks run Sun–Thu (Sunday night trades count on Sunday; no Fri/Sat).
 - Tap a day to enter profit/loss. Wins show green, losses red.
-- Data is saved in the browser (localStorage) for now.
+- Data saved in Supabase (table `pnl_entries`) behind a login; row-level security limits each user to their own rows.
 
 **Next**
 - Supabase database + login (so data is saved online).
