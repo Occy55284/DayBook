@@ -4,7 +4,7 @@ import TabBar from "@/components/TabBar";
 import AuthGate from "@/components/AuthGate";
 
 export const metadata: Metadata = {
-  title: "PnL Tracker",
+  title: "Daybook",
   description: "Track daily trading profit and loss",
 };
 
