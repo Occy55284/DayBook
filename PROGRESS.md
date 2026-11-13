@@ -2,6 +2,21 @@
 
 Newest entry first.
 
+## 2026-11-13 — Sunday commission and daily lot size
+**Done**
+- Sunday entry box now has a Broker commission field. It is filled in with 30% of the previous week's profit (nothing if the week was a loss) and can be edited or emptied. Saved in new table `pnl_commissions`.
+- Totals (Calendar and Analytics net / running total) are now AFTER commission. A line under the total shows the commission and the trades-only figure. A Sunday with commission shows an orange dot in the month view.
+- Every day's entry box asks for the lot size (0.01, 0.02 ... quick-pick buttons or typed). It starts from the last lot used, is saved with the trade (`pnl_entries.lot_size`), and shows on the day's trade. Display only, never used in any sums.
+- Settings has the commission % (default 30), saved in new table `pnl_settings`.
+- Database changes were applied to Supabase: new tables `pnl_commissions` and `pnl_settings` (row-level security, own rows only) and a nullable `lot_size` column on `pnl_entries`. Older entries simply have no lot.
+
+**Notes / decisions**
+- "Last week" for the commission means the 5 trading days (Sun-Thu) before that Sunday.
+- The old `gmc_requests` table from the previous app is still in the same Supabase project and is open to anyone with the public key. Not touched here.
+
+**Next**
+- Win-rate ring and drawdown chart.
+
 ## 2026-11-12 — Renamed to Daybook
 **Done**
 - App name is now Daybook: sign-in screen, browser tab title, README and package name.
