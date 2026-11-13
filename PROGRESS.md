@@ -2,6 +2,21 @@
 
 Newest entry first.
 
+## 2026-11-13 — Monday-to-Friday week, commission on its own Sunday row
+**Done**
+- Weeks are now Monday to Friday (Calendar, Analytics, month grid). The app opens on this week; at the weekend that is the week that just ended.
+- The week's commission is paid on the Sunday right after its Friday. The Week view has a Sunday row under Friday: tap it to enter the commission, pre-filled with 30% of that Mon-Fri week's profit (editable, empty = none). The month view shows it as an orange strip under its week.
+- A week's total includes its Sunday's commission, so it is real profit after commission. Month/year/all totals count commission in the month it was paid.
+- Data move (done in the database): the five trades entered on Sun 8 - Thu 12 Nov were moved one day later to Mon 9 - Fri 13 Nov, as requested.
+- Locked down the old `gmc_requests` table (removed its open policy; no data deleted).
+
+**Notes / decisions**
+- Losing weeks: the app suggests no commission, but you can type one in. Still to be confirmed against the broker.
+- Sunday trades are no longer possible (no Sunday square).
+
+**Next**
+- Win-rate ring and drawdown chart.
+
 ## 2026-11-13 — Sunday commission and daily lot size
 **Done**
 - Sunday entry box now has a Broker commission field. It is filled in with 30% of the previous week's profit (nothing if the week was a loss) and can be edited or emptied. Saved in new table `pnl_commissions`.

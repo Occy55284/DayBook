@@ -3,16 +3,16 @@ import type { Commissions, Lots, Trades } from "./store";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
-// Last week's trading profit, for the week before the Sunday `sundayKey`.
-export function lastWeekNet(trades: Trades, sundayKey: string): number {
-  const prevSunday = addDays(fromKey(sundayKey), -7);
-  return weekDays(prevSunday).reduce((s, d) => s + (trades[toKey(d)] ?? 0), 0);
+// Trading profit of the Monday-to-Friday week that ends just before the Sunday `sundayKey`.
+export function weekNetBeforeSunday(trades: Trades, sundayKey: string): number {
+  const monday = addDays(fromKey(sundayKey), -6);
+  return weekDays(monday).reduce((s, d) => s + (trades[toKey(d)] ?? 0), 0);
 }
 
-// The commission the app fills in: pct% of last week's profit.
-// A losing (or flat) week means no commission.
+// The commission the app fills in: pct% of that week's profit.
+// A losing (or flat) week means no commission is suggested.
 export function suggestedCommission(trades: Trades, sundayKey: string, pct: number): number {
-  const net = lastWeekNet(trades, sundayKey);
+  const net = weekNetBeforeSunday(trades, sundayKey);
   return net > 0 ? round2((net * pct) / 100) : 0;
 }
 

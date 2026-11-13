@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { addDays, formatWeekRange, fromKey, isTradingDay, monthName, weekStart } from "@/lib/dates";
+import { addDays, formatWeekRange, fromKey, monthName, weekStart } from "@/lib/dates";
 import {
   Bar, Period, barsForPeriod, currentStreak, entriesInPeriod, runningTotal, summarise,
 } from "@/lib/analytics";
@@ -86,10 +86,8 @@ export default function AnalyticsView() {
   const { trades, error } = useTrades();
   const { commissions, error: commError } = useCommissions();
   const [mode, setMode] = useState<Period>("month");
-  const [anchor, setAnchor] = useState<Date>(() => {
-    const t = new Date();
-    return isTradingDay(t) ? t : addDays(t, 7 - t.getDay());
-  });
+  // Start on this week (at the weekend, the week that just ended).
+  const [anchor, setAnchor] = useState<Date>(() => new Date());
   const year = anchor.getFullYear();
   const month = anchor.getMonth();
 
