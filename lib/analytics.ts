@@ -1,4 +1,4 @@
-import { monthName, toKey, weekDays, weekStart } from "./dates";
+import { commissionSunday, monthName, toKey, weekDays, weekStart } from "./dates";
 import type { Trades } from "./store";
 
 export type Period = "week" | "month" | "year" | "all";
@@ -8,7 +8,9 @@ export type Entry = { key: string; value: number };
 export function entriesInPeriod(trades: Trades, mode: Period, anchor: Date): Entry[] {
   const year = anchor.getFullYear();
   const month = String(anchor.getMonth() + 1).padStart(2, "0");
-  const weekKeys = new Set(weekDays(weekStart(anchor)).map(toKey));
+  // The week's five trading days, plus the Sunday after it (when its commission is paid).
+  const monday = weekStart(anchor);
+  const weekKeys = new Set([...weekDays(monday), commissionSunday(monday)].map(toKey));
 
   const inPeriod = (key: string) =>
     mode === "week" ? weekKeys.has(key)
@@ -66,7 +68,7 @@ export type Bar = { label: string; value: number | null };
 export function barsForPeriod(trades: Trades, mode: Period, anchor: Date): Bar[] {
   if (mode === "week") {
     return weekDays(weekStart(anchor)).map((d) => ({
-      label: ["Sun", "Mon", "Tue", "Wed", "Thu"][d.getDay()],
+      label: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getDay()],
       value: trades[toKey(d)] ?? null,
     }));
   }
@@ -78,7 +80,7 @@ export function barsForPeriod(trades: Trades, mode: Period, anchor: Date): Bar[]
     const last = new Date(y, m + 1, 0).getDate();
     for (let day = 1; day <= last; day++) {
       const d = new Date(y, m, day);
-      if (d.getDay() > 4) continue; // no Fri/Sat trading
+      if (d.getDay() === 0 || d.getDay() === 6) continue; // no weekend trading
       bars.push({ label: String(day), value: trades[toKey(d)] ?? null });
     }
     return bars;
