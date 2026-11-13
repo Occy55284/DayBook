@@ -99,3 +99,19 @@ body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 .modal input.neg { color: var(--red); }
 .amount-hint { margin: 8px 2px 0; font-size: 14px; }
 .b-save:disabled { opacity: .4; }
+
+/* Commission and lot size */
+.stat-sub { display: block; margin-top: 4px; color: var(--muted); font-size: 14px; font-weight: 600; }
+.muted { color: var(--muted); }
+.weekrow .v small { display: block; margin-top: 3px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.weekrow .v small.comm { color: #f59e0b; }
+.cell { position: relative; }
+.cell em.lot { font-style: normal; font-size: 11px; font-weight: 600; color: var(--muted); margin-top: -4px; }
+.cdot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; }
+.cdot.inline { position: static; display: inline-block; margin-right: 6px; }
+.legend { color: var(--muted); font-size: 14px; margin: 4px 4px 0; }
+.field-label { color: var(--muted); font-size: 14px; font-weight: 600; margin: 16px 2px 8px; }
+.chips { display: flex; gap: 8px; margin-bottom: 10px; }
+.chip { flex: 1; padding: 10px 0; border: 1px solid #374151; border-radius: 10px; background: transparent; color: var(--text); font-size: 16px; font-weight: 700; }
+.chip.on { background: var(--green); border-color: var(--green); color: #052e16; }
+.settings-input { width: 100%; margin-top: 8px; font-size: 26px; font-weight: 700; padding: 12px 14px; border-radius: 12px; border: 1px solid #374151; background: #0b1220; color: #fff; }

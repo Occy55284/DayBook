@@ -4,7 +4,8 @@ import { addDays, formatWeekRange, fromKey, isTradingDay, monthName, weekStart }
 import {
   Bar, Period, barsForPeriod, currentStreak, entriesInPeriod, runningTotal, summarise,
 } from "@/lib/analytics";
-import { money, useTrades } from "@/lib/store";
+import { realDays } from "@/lib/finance";
+import { money, useCommissions, useTrades } from "@/lib/store";
 
 const cls = (n: number) => (n > 0 ? "pos" : n < 0 ? "neg" : "");
 const shortDate = (key: string) =>
@@ -83,6 +84,7 @@ function EquityChart({ points }: { points: { key: string; value: number }[] }) {
 
 export default function AnalyticsView() {
   const { trades, error } = useTrades();
+  const { commissions, error: commError } = useCommissions();
   const [mode, setMode] = useState<Period>("month");
   const [anchor, setAnchor] = useState<Date>(() => {
     const t = new Date();
@@ -99,7 +101,16 @@ export default function AnalyticsView() {
 
   const entries = useMemo(() => entriesInPeriod(trades, mode, anchor), [trades, mode, anchor]);
   const summary = useMemo(() => summarise(entries), [entries]);
-  const curve = useMemo(() => runningTotal(entries), [entries]);
+  // Commission paid in this period, and the running total AFTER commission.
+  const commTotal = useMemo(
+    () => entriesInPeriod(commissions, mode, anchor).reduce((s, e) => s + e.value, 0),
+    [commissions, mode, anchor]
+  );
+  const realNet = summary.net - commTotal;
+  const curve = useMemo(
+    () => runningTotal(entriesInPeriod(realDays(trades, commissions), mode, anchor)),
+    [trades, commissions, mode, anchor]
+  );
   const bars = useMemo(() => barsForPeriod(trades, mode, anchor), [trades, mode, anchor]);
   const streak = useMemo(() => currentStreak(trades), [trades]);
 
@@ -126,11 +137,16 @@ export default function AnalyticsView() {
         {mode === "all" ? <span style={{ width: 40 }} /> : <button onClick={() => step(1)} aria-label="Next">›</button>}
       </div>
 
-      {error && <p className="neg">{error}</p>}
+      {(error || commError) && <p className="neg">{error || commError}</p>}
 
       <div className="card" style={{ marginBottom: 12 }}>
         <div className="label">Net P&amp;L</div>
-        <div className={`big ${cls(summary.net)}`}>{money(summary.net)}</div>
+        <div className={`big ${cls(realNet)}`}>{money(realNet)}</div>
+        {commTotal > 0 && (
+          <div className="label" style={{ fontSize: 14, marginTop: 4 }}>
+            After {money(commTotal)} commission (trades {money(summary.net)})
+          </div>
+        )}
         <div className="label" style={{ fontSize: 14, marginTop: 4 }}>
           {summary.days} {summary.days === 1 ? "day" : "days"} logged
         </div>
