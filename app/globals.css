@@ -129,3 +129,24 @@ body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 /* "Undo" bar after clearing a day */
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(96px + env(safe-area-inset-bottom)); width: calc(100% - 32px); max-width: 448px; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #1f2937; color: #fff; border-radius: 14px; padding: 10px 14px 10px 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); z-index: 9; font-weight: 600; }
 .toast button { background: none; border: 0; color: var(--green); font-size: 17px; font-weight: 800; padding: 8px 10px; }
+
+/* Sign in, join and invite codes */
+.login .field { display: flex; flex-direction: column; gap: 6px; }
+.login label, .field label { color: var(--muted); font-size: 14px; font-weight: 600; }
+.login .muted { margin: 0; text-align: center; }
+.login .title { margin-bottom: 4px; }
+.link-btn { background: none; border: 0; color: var(--green); font-size: 16px; font-weight: 600; padding: 10px; text-align: center; }
+.login select, .field select { appearance: none; }
+select.settings-input { width: 100%; }
+.field { margin-top: 12px; }
+.login .field { margin-top: 0; }
+.invite-fresh { margin-top: 16px; padding-top: 4px; border-top: 1px solid #1f2937; }
+.invite-code { margin-top: 14px; padding: 14px; border-radius: 12px; background: #0b1220; text-align: center; font-size: 26px; font-weight: 800; letter-spacing: 1px; color: var(--green); user-select: all; }
+.share-text { background: #0b1220; border-radius: 12px; padding: 12px 14px; margin: 6px 0 12px; font-size: 15px; line-height: 1.4; user-select: all; }
+.invite-list { list-style: none; padding: 0; margin: 0; }
+.invite-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 0; border-top: 1px solid #1f2937; }
+.invite-code-small { font-weight: 800; letter-spacing: 0.5px; }
+.invite-note { color: var(--muted); }
+.invite-status { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.invite-item.used .invite-code-small, .invite-item.expired .invite-code-small, .invite-item.revoked .invite-code-small { color: var(--muted); text-decoration: line-through; }
+.invite-item.waiting .invite-status { color: var(--green); }

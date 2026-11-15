@@ -2,6 +2,26 @@
 
 Newest entry first.
 
+## 2026-11-15 — Phase 2A: invite-only sign-up, forgot password
+**Done**
+- Sign-in screen is now four screens: Sign in, **Join with an invite code**, **Forgot password**, and **Choose a new password** (for the reset-email link). The old open "Create account" button is gone.
+- Invite codes: new tables `app_admins`, `invites`, `invite_attempts` and function `create_invite()` (admin-only, checked by database rules; 15 security checks run directly against the database).
+- Sign-up Edge Function `signup-with-invite` (deployed, Verify JWT off): checks the code, creates the account, gives the code back if anything fails, and slows down guessing (30 bad codes / 10 minutes). Its rules (`handler.ts`) have 21 tests.
+- Owner screen in Settings ("Invite someone"): create a code with a note and expiry, copy a ready-made message, see waiting / used / expired / cancelled, cancel a waiting code. Only admins see it.
+- 81 automated tests; the new screens pass the automated accessibility scan.
+
+**Needs the owner (cannot be done from code)**
+- Switch OFF "Allow new users to sign up" in Supabase, otherwise the invite gate can be skipped by calling the sign-up service directly.
+- Email: Supabase's built-in sender only emails the project team. For password-reset emails to reach members, set up a custom email sender (SMTP) and ideally a domain.
+- Turn on leaked-password protection (Supabase, Authentication; needs a paid plan).
+
+**Notes / decisions**
+- Accounts made with a code are marked email-confirmed without sending an email (the code is the gate), so the typed email is not verified. The join screen asks for the email twice because the password reset goes there.
+- Not tested live end to end from the build machine (it can't reach Supabase's web address). The function's rules and the database rules are tested; the first real join is the live confirmation.
+
+**Next**
+- Phase 2B: delete-my-account. Phase 2C: privacy policy, terms and the "not financial advice" notice (needs the owner's name/contact details). Phase 2D: email sender, domain, hosting plans, backups, error monitoring.
+
 ## 2026-11-15 — Phase 1: safer, in pounds, accessible, tested
 Result of a full review of the app (see the review notes in the pull request). Plan from here: Phase 2 = ready for other users, Phase 3 = installable app + trader tools (win rate, drawdown, goals, balance), Phase 4 = community side + journal.
 
