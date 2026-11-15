@@ -37,12 +37,13 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     setBusy(false);
   }
 
-  if (checking) return <p className="soon">Loading…</p>;
+  if (checking) return <p className="soon" role="status">Loading…</p>;
   if (session) return <>{children}</>;
 
   return (
+    <main>
     <form className="login" onSubmit={signIn}>
-      <div className="title">Daybook</div>
+      <h1 className="title">Daybook</h1>
       <input type="email" placeholder="Email" autoComplete="email" required
         value={email} onChange={(e) => setEmail(e.target.value)} />
       <input type="password" placeholder="Password (min 6 characters)" autoComplete="current-password" required
@@ -51,5 +52,6 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
       <button className="b-save" type="submit" disabled={busy}>Sign in</button>
       <button className="b-clear" type="button" disabled={busy} onClick={signUp}>Create account</button>
     </form>
+    </main>
   );
 }

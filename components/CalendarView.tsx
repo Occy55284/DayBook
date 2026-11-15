@@ -1,11 +1,13 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   TRADING_DAYS, addDays, commissionSunday, formatWeekRange, fromKey,
   monthGrid, monthName, toKey, weekDays, weekStart,
 } from "@/lib/dates";
 import { lastLotBefore, lotText, suggestedCommission, weekNetBeforeSunday } from "@/lib/finance";
-import { money, signed, useCommissions, useSettings, useTrades } from "@/lib/store";
+import { money, signed } from "@/lib/format";
+import { useData } from "./DataProvider";
+import { LoadError, Skeleton } from "./LoadState";
 
 type Mode = "week" | "month" | "year" | "all";
 type DayMap = Record<string, number>;
@@ -22,9 +24,7 @@ function sumPrefix(map: DayMap, prefix: string) {
 }
 
 export default function CalendarView() {
-  const { trades, lots, setDay, error } = useTrades();
-  const { commissions, setCommission, error: commError } = useCommissions();
-  const { settings } = useSettings();
+  const { trades, lots, commissions, settings, setDay, setCommission, ready, failed, error, reload } = useData();
   const today = new Date();
   const [mode, setMode] = useState<Mode>("week");
   // Start on this week (at the weekend that is the week that just ended, so you can add its commission).
@@ -33,12 +33,55 @@ export default function CalendarView() {
   const [text, setText] = useState("");
   const [lotInput, setLotInput] = useState("");
   const [commText, setCommText] = useState("");
+  // After clearing a day or a commission, offer to put it back for a few seconds.
+  const [undo, setUndo] = useState<{ message: string; restore: () => void } | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
 
   const todayKey = toKey(today);
   const year = anchor.getFullYear();
   const month = anchor.getMonth();
 
+  useEffect(() => {
+    if (!undo) return;
+    const id = setTimeout(() => setUndo(null), 6000);
+    return () => clearTimeout(id);
+  }, [undo]);
+
+  // Pop-up keyboard support: Escape closes it, Tab stays inside it.
+  useEffect(() => {
+    if (!editing) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeModal();
+      } else if (e.key === "Tab" && dialogRef.current) {
+        const items = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>("button:not([disabled]), input:not([disabled])")
+        );
+        if (items.length === 0) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [editing]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function rememberOpener() {
+    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  }
+  // Close the pop-up and hand focus back to the button that opened it.
+  function closeModal() {
+    setEditing(null);
+    const el = openerRef.current;
+    if (el) setTimeout(() => el.focus(), 0);
+  }
+
   function open(key: string) {
+    rememberOpener();
     setEditing({ key, kind: "day" });
     const existing = trades[key];
     setText(existing !== undefined ? String(existing) : "");
@@ -50,6 +93,7 @@ export default function CalendarView() {
   }
   // `sundayKey` is the Sunday after a Monday-to-Friday week, when its commission is paid.
   function openCommission(sundayKey: string) {
+    rememberOpener();
     setEditing({ key: sundayKey, kind: "commission" });
     const suggestion = suggestedCommission(trades, sundayKey, settings.commissionPct);
     setCommText(
@@ -82,13 +126,27 @@ export default function CalendarView() {
         lotInput.trim() === "" ? null : parseFloat(lotInput)
       );
     }
-    setEditing(null);
+    closeModal();
   }
+  // Clear removes the day (or the commission) but keeps a few seconds to undo it.
   function clearDay() {
     if (!editing) return;
-    if (editing.kind === "commission") setCommission(editing.key, null);
-    else setDay(editing.key, null);
-    setEditing(null);
+    const { key, kind } = editing;
+    if (kind === "commission") {
+      const previous = commissions[key];
+      if (previous !== undefined) {
+        setCommission(key, null);
+        setUndo({ message: "Commission cleared", restore: () => setCommission(key, previous) });
+      }
+    } else {
+      const previous = trades[key];
+      const previousLot = lots[key];
+      if (previous !== undefined) {
+        setDay(key, null);
+        setUndo({ message: `${shortDate(key)} cleared`, restore: () => setDay(key, previous, previousLot ?? null) });
+      }
+    }
+    closeModal();
   }
 
   function step(dir: number) {
@@ -112,6 +170,10 @@ export default function CalendarView() {
   const commTotal = useMemo(() => periodSum(commissions), [mode, anchor, commissions, year, month]); // eslint-disable-line react-hooks/exhaustive-deps
   const total = tradesTotal - commTotal;
 
+  // Until your real numbers have loaded, nothing can be tapped, so nothing can be overwritten.
+  if (failed) return (<><h1 className="sr-only">Calendar</h1><LoadError message={error} onRetry={reload} /></>);
+  if (!ready) return (<><h1 className="sr-only">Calendar</h1><Skeleton /></>);
+
   const heading =
     mode === "week" ? formatWeekRange(monday)
     : mode === "month" ? `${monthName(month)} ${year}`
@@ -121,9 +183,10 @@ export default function CalendarView() {
 
   return (
     <>
+      <h1 className="sr-only">Calendar</h1>
       <div className="seg">
         {(["week", "month", "year", "all"] as Mode[]).map((m) => (
-          <button key={m} className={mode === m ? "on" : ""} onClick={() => setMode(m)}>
+          <button key={m} className={mode === m ? "on" : ""} aria-pressed={mode === m} onClick={() => setMode(m)}>
             {m[0].toUpperCase() + m.slice(1)}
           </button>
         ))}
@@ -131,11 +194,11 @@ export default function CalendarView() {
 
       <div className="nav">
         {mode === "all" ? <span style={{ width: 40 }} /> : <button onClick={() => step(-1)} aria-label="Previous">‹</button>}
-        <span>{heading}</span>
+        <span aria-live="polite">{heading}</span>
         {mode === "all" ? <span style={{ width: 40 }} /> : <button onClick={() => step(1)} aria-label="Next">›</button>}
       </div>
 
-      {(error || commError) && <p className="neg">{error || commError}</p>}
+      {error && <p className="neg" role="alert">{error}</p>}
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="label">Total P&amp;L</div>
         <div className={`big ${cls(total || undefined) || ""}`}>{money(total)}</div>
@@ -151,13 +214,24 @@ export default function CalendarView() {
             const v = trades[k];
             const lot = lots[k];
             return (
-              <button key={k} className={`weekrow ${k === todayKey ? "today" : ""}`} onClick={() => open(k)}>
+              <button
+                key={k}
+                className={`weekrow ${k === todayKey ? "today" : ""}`}
+                onClick={() => open(k)}
+              >
                 <div className="d">{d.getDate()}<small>{TRADING_DAYS[i]}</small></div>
                 <div className={`v ${cls(v)}`}>
-                  {v === undefined ? "–" : money(v)}
+                  {v === undefined ? (
+                    <>
+                      <span aria-hidden="true">–</span>
+                      <span className="sr-only">no trade</span>
+                    </>
+                  ) : (
+                    money(v)
+                  )}
                   {lot !== undefined && <small>Lot {lotText(lot)}</small>}
                 </div>
-                <span className="arrow">{v === undefined ? "＋" : "↗"}</span>
+                <span className="arrow" aria-hidden="true">{v === undefined ? "＋" : "↗"}</span>
               </button>
             );
           })}
@@ -170,14 +244,14 @@ export default function CalendarView() {
               {weekComm === undefined ? <span className="muted">Commission</span> : <span className="commtext">−{money(weekComm)}</span>}
               <small>{weekComm === undefined ? "Paid on Sunday for this week" : "Commission paid"}</small>
             </div>
-            <span className="arrow">{weekComm === undefined ? "＋" : "↗"}</span>
+            <span className="arrow" aria-hidden="true">{weekComm === undefined ? "＋" : "↗"}</span>
           </button>
         </>
       )}
 
       {mode === "month" && (
         <>
-          <div className="dow">{TRADING_DAYS.map((d) => <div key={d}>{d}</div>)}</div>
+          <div className="dow" aria-hidden="true">{TRADING_DAYS.map((d) => <div key={d}>{d}</div>)}</div>
           {monthGrid(year, month).map((row, r) => {
             // The Sunday after this row's week, when its commission is paid.
             const rowSunday = toKey(commissionSunday(weekStart(row.find(Boolean) as Date)));
@@ -186,16 +260,32 @@ export default function CalendarView() {
               <div key={r} style={{ marginBottom: 8 }}>
                 <div className="grid5">
                   {row.map((d, c) => {
-                    if (!d) return <div key={c} className="cell empty" />;
+                    if (!d) return <div key={c} className="cell empty" aria-hidden="true" />;
                     const k = toKey(d);
                     const v = trades[k];
                     const lot = lots[k];
                     const state = v === undefined ? "" : v >= 0 ? "win" : "loss";
                     return (
-                      <button key={c} className={`cell ${state} ${k === todayKey ? "today" : ""}`} onClick={() => open(k)}>
-                        <span>{d.getDate()}</span>
-                        {v === undefined ? <span className="dash">—</span> : <b>{signed(v)}</b>}
-                        {lot !== undefined && <em className="lot">{lotText(lot)}</em>}
+                      <button
+                        key={c}
+                        className={`cell ${state} ${k === todayKey ? "today" : ""}`}
+                        onClick={() => open(k)}
+                      >
+                        <span>
+                          {d.getDate()}
+                          <span className="sr-only"> {d.toLocaleDateString("en-GB", { weekday: "long" })}</span>
+                        </span>
+                        {v === undefined ? (
+                          <>
+                            <span className="dash" aria-hidden="true">—</span>
+                            <span className="sr-only">no trade</span>
+                          </>
+                        ) : (
+                          <b>{signed(v)}</b>
+                        )}
+                        {lot !== undefined && (
+                          <em className="lot"><span className="sr-only">lot </span>{lotText(lot)}</em>
+                        )}
                       </button>
                     );
                   })}
@@ -217,9 +307,13 @@ export default function CalendarView() {
             const p = `${year}-${String(m + 1).padStart(2, "0")}`;
             const t = sumPrefix(trades, p) - sumPrefix(commissions, p);
             return (
-              <button key={m} className="mini" onClick={() => { setAnchor(new Date(year, m, 1)); setMode("month"); }}>
-                <h4>{monthName(m).slice(0, 3)}</h4>
-                <div className="mg">
+              <button
+                key={m}
+                className="mini"
+                onClick={() => { setAnchor(new Date(year, m, 1)); setMode("month"); }}
+              >
+                <h2>{monthName(m).slice(0, 3)}</h2>
+                <div className="mg" aria-hidden="true">
                   {monthGrid(year, m).flat().map((d, i) => {
                     if (!d) return <i key={i} className="none" />;
                     const v = trades[toKey(d)];
@@ -248,10 +342,24 @@ export default function CalendarView() {
           })
         ))}
 
+      {undo && (
+        <div className="toast" role="status">
+          <span>{undo.message}</span>
+          <button onClick={() => { undo.restore(); setUndo(null); }}>Undo</button>
+        </div>
+      )}
+
       {editing && (
-        <div className="modal-bg" onClick={() => setEditing(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>{fromKey(editing.key).toDateString()}</h3>
+        <div className="modal-bg" onClick={closeModal}>
+          <div
+            className="modal"
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dialog-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="dialog-title">{fromKey(editing.key).toDateString()}</h2>
 
             {editing.kind === "day" ? (
               <>
@@ -271,13 +379,14 @@ export default function CalendarView() {
                     autoFocus
                     inputMode="decimal"
                     className={isLoss ? "neg" : ""}
+                    aria-label="Profit or loss amount in pounds"
                     placeholder="Amount"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && save()}
                   />
                 </div>
-                {invalid && <p className="neg amount-hint">Enter a number, e.g. 41.10</p>}
+                {invalid && <p className="neg amount-hint" role="alert">Enter a number, e.g. 41.10</p>}
 
                 <div className="field-label">Lot size you traded</div>
                 <div className="chips">
@@ -286,6 +395,7 @@ export default function CalendarView() {
                       key={c}
                       type="button"
                       className={`chip ${parseFloat(lotInput) === c ? "on" : ""}`}
+                      aria-pressed={parseFloat(lotInput) === c}
                       onClick={() => setLotInput(String(c))}
                     >
                       {lotText(c)}
@@ -294,12 +404,13 @@ export default function CalendarView() {
                 </div>
                 <input
                   inputMode="decimal"
+                  aria-label="Lot size"
                   placeholder="Or type a lot size, e.g. 0.06"
                   value={lotInput}
                   onChange={(e) => setLotInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && save()}
                 />
-                {lotInvalid && <p className="neg amount-hint">Enter a number above 0, e.g. 0.01</p>}
+                {lotInvalid && <p className="neg amount-hint" role="alert">Enter a number above 0, e.g. 0.01</p>}
               </>
             ) : (
               <>
@@ -309,13 +420,14 @@ export default function CalendarView() {
                 <input
                   autoFocus
                   inputMode="decimal"
+                  aria-label="Broker commission in pounds"
                   placeholder="Commission, e.g. 45.00"
                   value={commText}
                   onChange={(e) => setCommText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && save()}
                 />
                 {commInvalid ? (
-                  <p className="neg amount-hint">Enter a number of 0 or more, e.g. 45.00</p>
+                  <p className="neg amount-hint" role="alert">Enter a number of 0 or more, e.g. 45.00</p>
                 ) : (
                   <p className="amount-hint muted">
                     This week&apos;s trades (Mon–Fri): {money(weekNetBeforeSunday(trades, editing.key))}. Change the number if
@@ -326,7 +438,7 @@ export default function CalendarView() {
             )}
 
             <div className="btns">
-              <button className="b-cancel" onClick={() => setEditing(null)}>Cancel</button>
+              <button className="b-cancel" onClick={closeModal}>Cancel</button>
               <button className="b-clear" onClick={clearDay}>Clear</button>
               <button className="b-save" onClick={save} disabled={bad}>Save</button>
             </div>
