@@ -2,6 +2,33 @@
 
 Newest entry first.
 
+## 2026-11-15 — Phase 2C: privacy policy, terms and the agreement
+**Done**
+- New public pages `/privacy` and `/terms` (readable without signing in), in plain English, written from what the app really does. The app screens moved into a route group so only they sit behind sign-in; web addresses are unchanged.
+- Joining needs a ticked box agreeing to the Terms and Privacy policy and acknowledging "record-keeping tool, not financial advice". Both links open in a new tab so nothing typed is lost.
+- The sign-up function records which version of the legal pages was agreed to, and when, on the account. (Code and tests are in this change; it is deployed to Supabase right after this is merged, because the current live join screen has no box.)
+- Sign-in screens show the not-financial-advice notice and links; Settings has an About card with the notice, links, the contact email and the date of the legal pages.
+- 102 automated tests; every earlier browser check and accessibility scan still passes; the new pages have 0 accessibility issues.
+
+**Statements in the drafts the owner must be able to stand behind (please confirm or edit in `app/(legal)/`)**
+1. Based in the UK: UK data-protection law, the ICO as the regulator, and English law in the Terms.
+2. "I will only look at your records if I need to fix a problem, or if the law requires it."
+3. Replying to data requests within one month.
+4. Giving notice before stopping Daybook "where I can", and never charging without clear agreement first.
+5. Data stored in Supabase's London region (checked: the project is in eu-west-2). Hosting by Vercel.
+6. Backups: the drafts say copies in backups are removed when they expire under the provider's schedule. Check what the Supabase plan actually keeps (Phase 2D).
+7. Password-reset emails go through the login system's email service (to be updated when a custom email sender is set up in Phase 2D).
+8. 18 or over.
+9. The contact email is shown publicly on both pages. A separate address for Daybook would keep the personal inbox private.
+10. Whether the UK data protection fee to the ICO applies (it can apply even to a side project that handles other people's personal data). Worth a quick check on ico.org.uk.
+
+**Notes / decisions**
+- No cookie banner is needed at present: the only thing stored on the device is the sign-in session, which is strictly necessary, and there are no analytics or advertising trackers. Revisit if either is ever added.
+- Existing account (the owner's) has no agreement record; it only applies to people who join through the new screen.
+
+**Next**
+- Phase 2D: email sender, domain, hosting plans, backups, error monitoring.
+
 ## 2026-11-15 — Phase 2B: delete my account
 **Done**
 - Settings has **Delete my account** (hidden behind a button, with a plain warning and a tip to download your data first). The final button stays off until the password is entered and DELETE is typed.

@@ -14,7 +14,7 @@ class FakeStore implements InviteStore {
   users = new Map<string, string>(); // email -> user id
   claims: string[] = [];
   createUserOverride: (() => Promise<CreateUserResult>) | null = null;
-  createdWith: { email: string; password: string }[] = [];
+  createdWith: { email: string; password: string; metadata: { termsVersion: string; acceptedAt: string } }[] = [];
 
   async recentFailures(sinceIso: string) {
     return this.failures.filter((d) => d.toISOString() >= sinceIso).length;
@@ -34,8 +34,8 @@ class FakeStore implements InviteStore {
   async markInviteUsed(id: string, userId: string) {
     this.used.set(id, userId);
   }
-  async createUser(email: string, password: string): Promise<CreateUserResult> {
-    this.createdWith.push({ email, password });
+  async createUser(email: string, password: string, metadata: { termsVersion: string; acceptedAt: string }): Promise<CreateUserResult> {
+    this.createdWith.push({ email, password, metadata });
     if (this.createUserOverride) return this.createUserOverride();
     if (this.users.has(email)) return { error: "exists", message: "already registered" };
     const id = `user-${this.users.size + 1}`;
@@ -46,7 +46,7 @@ class FakeStore implements InviteStore {
 
 const post = (body: unknown) =>
   new Request("https://example.test/signup", { method: "POST", body: typeof body === "string" ? body : JSON.stringify(body) });
-const good = { code: GOOD_CODE, email: "Sam@Example.com ", password: "correct horse" };
+const good = { code: GOOD_CODE, email: "Sam@Example.com ", password: "correct horse", acceptedTerms: true, termsVersion: "2026-11-15" };
 
 let store: FakeStore;
 const run = (req: Request) => handleSignup(req, store, () => NOW);
@@ -81,7 +81,14 @@ describe("joining with a code", () => {
 
   it("tidies the email (trim, lower case) and accepts a loosely typed code", async () => {
     await run(post({ ...good, code: "k7qm x2pa 9wtd" }));
-    expect(store.createdWith).toEqual([{ email: "sam@example.com", password: "correct horse" }]);
+    expect(store.createdWith.map(({ email, password }) => ({ email, password }))).toEqual([
+      { email: "sam@example.com", password: "correct horse" },
+    ]);
+  });
+
+  it("records which version of the Terms they agreed to, and when", async () => {
+    await run(post(good));
+    expect(store.createdWith[0].metadata).toEqual({ termsVersion: "2026-11-15", acceptedAt: NOW.toISOString() });
   });
 
   it("a code only works once", async () => {
@@ -130,6 +137,26 @@ describe("mistakes don't use up a code", () => {
 
   it("text that is not JSON", async () => {
     expect((await run(post("hello"))).status).toBe(400);
+    expect(store.claims).toHaveLength(0);
+  });
+});
+
+describe("agreeing to the Terms and Privacy policy", () => {
+  it("is required, and a refusal doesn't use up the code", async () => {
+    for (const acceptedTerms of [undefined, false, "true", 1, null]) {
+      const res = await run(post({ ...good, acceptedTerms }));
+      expect(res.status).toBe(400);
+      expect((await json(res)).error).toMatch(/tick the box/);
+    }
+    expect(store.claims).toHaveLength(0);
+    expect(store.users.size).toBe(0);
+  });
+
+  it("needs a properly formed version date", async () => {
+    for (const termsVersion of [undefined, "", "yesterday", "2026-11-1", "2026/11/15", 20261115]) {
+      const res = await run(post({ ...good, termsVersion }));
+      expect(res.status).toBe(400);
+    }
     expect(store.claims).toHaveLength(0);
   });
 });

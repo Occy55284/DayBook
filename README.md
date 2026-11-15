@@ -57,6 +57,16 @@ commissions, settings). It asks for the password and the word DELETE, and is hid
 - The database does the clean-up: every table that holds personal data is linked to the login with "delete cascades",
   so removing the login removes the data (tested against the live database with a throwaway user).
 
+## Privacy policy and terms
+Public pages at `/privacy` and `/terms` (no sign-in needed), written for the UK and for a personal, non-company project run by
+the owner named in `lib/legal.ts` (name, contact email, the version date and the "not financial advice" sentence all live there).
+- Joining requires ticking an agreement box. The sign-up function records **which version of the Terms and Privacy policy** was
+  agreed to and **when** on the account (`terms_version`, `terms_accepted_at` in the user's metadata).
+- When the legal pages change in a way people should re-agree to, update the text, `LEGAL_VERSION` and `LEGAL_UPDATED` in `lib/legal.ts`.
+- These are plain-English drafts that match what the app actually does. They are not legal advice: have them checked before
+  offering Daybook widely, and keep them in step with the app (for example if the email service or hosting changes).
+- The sign-in screens have a short not-financial-advice notice and links; Settings has an About card.
+
 ## Database
 Supabase (Postgres). The whole design, including the per-user security rules, is in
 [`supabase/schema.sql`](supabase/schema.sql). To start a fresh copy, run that file once in a new

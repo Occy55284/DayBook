@@ -13,7 +13,8 @@ export type InviteStore = {
   claimInvite(code: string, nowIso: string): Promise<string | null>;
   releaseInvite(id: string): Promise<void>;
   markInviteUsed(id: string, userId: string): Promise<void>;
-  createUser(email: string, password: string): Promise<CreateUserResult>;
+  // `metadata` records which version of the Terms and Privacy policy the person agreed to, and when.
+  createUser(email: string, password: string, metadata: { termsVersion: string; acceptedAt: string }): Promise<CreateUserResult>;
 };
 
 export const CORS_HEADERS = {
@@ -65,6 +66,13 @@ export async function handleSignup(req: Request, store: InviteStore, now: () => 
   if (password.length < MIN_PASSWORD) return reply(400, { error: `Choose a password of at least ${MIN_PASSWORD} characters.` });
   if (password.length > MAX_PASSWORD) return reply(400, { error: `Choose a password of ${MAX_PASSWORD} characters or fewer.` });
 
+  // They must have agreed to the Terms and Privacy policy, and we keep which version they saw.
+  if (body.acceptedTerms !== true) {
+    return reply(400, { error: "Please tick the box to agree to the Terms and Privacy Policy." });
+  }
+  const termsVersion = typeof body.termsVersion === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.termsVersion) ? body.termsVersion : null;
+  if (!termsVersion) return reply(400, { error: "Something was missing. Please refresh the page and try again." });
+
   // Slow down anyone guessing codes (counted across everyone).
   const since = new Date(now().getTime() - FAILURE_WINDOW_MINUTES * 60_000).toISOString();
   if ((await store.recentFailures(since)) >= MAX_FAILURES) {
@@ -84,7 +92,7 @@ export async function handleSignup(req: Request, store: InviteStore, now: () => 
 
   // From here the code is reserved. If anything goes wrong, give it back so it isn't wasted.
   try {
-    const created = await store.createUser(email, password);
+    const created = await store.createUser(email, password, { termsVersion, acceptedAt: now().toISOString() });
     if ("error" in created) {
       await store.releaseInvite(inviteId);
       if (created.error === "exists") {

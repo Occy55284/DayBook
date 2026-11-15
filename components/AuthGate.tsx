@@ -5,6 +5,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { joinWithInvite } from "@/lib/auth";
 import { formatCodeInput } from "@/lib/invites";
+import { NOT_ADVICE } from "@/lib/legal";
 
 // Did the person arrive by tapping the link in a "reset your password" email?
 // Checked as soon as this file loads, before Supabase tidies the address bar.
@@ -34,6 +35,18 @@ function Notice({ msg }: { msg: Message }) {
     <p className={msg.kind === "error" ? "neg" : "pos"} role={msg.kind === "error" ? "alert" : "status"}>
       {msg.text}
     </p>
+  );
+}
+
+// Plain links (not the app's own navigation) because these screens are shown before anyone has signed in.
+function LegalFooter() {
+  return (
+    <footer className="legal-footer">
+      <p>{NOT_ADVICE}</p>
+      <p>
+        <a href="/privacy">Privacy policy</a> · <a href="/terms">Terms of use</a>
+      </p>
+    </footer>
   );
 }
 
@@ -91,6 +104,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [emailAgain, setEmailAgain] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     if (JUST_DELETED) window.history.replaceState(null, "", window.location.pathname);
@@ -127,6 +141,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
       return setMsg({ kind: "error", text: "The two email addresses don't match. Check for typos, because your password reset email goes there." });
     }
     if (password.length < MIN_PASSWORD) return setMsg({ kind: "error", text: `Choose a password of at least ${MIN_PASSWORD} characters.` });
+    if (!agreed) return setMsg({ kind: "error", text: "Please tick the box to agree to the Terms and Privacy Policy." });
     setBusy(true);
     setMsg(null);
     const problem = await joinWithInvite({ code, email, password });
@@ -178,6 +193,14 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
             value={emailAgain} onChange={(e) => setEmailAgain(e.target.value)} />
           <Field id="join-password" label={`Password (at least ${MIN_PASSWORD} characters)`} type="password" autoComplete="new-password" required
             value={password} onChange={(e) => setPassword(e.target.value)} />
+          <div className="check-row">
+            <input id="agree" type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
+            <label htmlFor="agree">
+              I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of use</a> and the{" "}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy policy</a>, and I understand Daybook is a
+              record-keeping tool, not financial advice.
+            </label>
+          </div>
           <Notice msg={msg} />
           <button className="b-save" type="submit" disabled={busy}>{busy ? "Joining…" : "Join"}</button>
           <button className="link-btn" type="button" onClick={() => go("signin")}>Back to sign in</button>
@@ -195,6 +218,8 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
           <button className="link-btn" type="button" onClick={() => go("signin")}>Back to sign in</button>
         </form>
       )}
+
+      <LegalFooter />
     </main>
   );
 }
