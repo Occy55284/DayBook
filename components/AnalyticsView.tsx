@@ -5,9 +5,11 @@ import {
   Bar, Period, barsForPeriod, currentStreak, entriesInPeriod, runningTotal, summarise,
 } from "@/lib/analytics";
 import { realDays } from "@/lib/finance";
+import { smoothPath } from "@/lib/curve";
 import { money } from "@/lib/format";
 import { useData } from "./DataProvider";
 import { LoadError, Skeleton } from "./LoadState";
+import Money from "./Money";
 
 const cls = (n: number) => (n > 0 ? "pos" : n < 0 ? "neg" : "");
 const shortDate = (key: string) =>
@@ -42,7 +44,7 @@ function BarChart({ bars }: { bars: Bar[] }) {
                 y={Math.min(y(b.value), y(0))}
                 width={barW}
                 height={Math.max(Math.abs(y(b.value) - y(0)), 2)}
-                rx="3"
+                rx="4"
                 fill={b.value >= 0 ? "var(--green)" : "var(--red)"}
               />
             )}
@@ -67,15 +69,21 @@ function EquityChart({ points }: { points: { key: string; value: number }[] }) {
   const span = top - bottom || 1;
   const x = (i: number) => PAD.left + (i / (points.length - 1)) * (W - PAD.left - PAD.right);
   const y = (v: number) => PAD.top + ((top - v) / span) * PLOT_H;
-  const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(" ");
+  const line = smoothPath(points.map((p, i) => ({ x: x(i), y: y(p.value) })));
   const last = points[points.length - 1];
   const colour = last.value >= 0 ? "var(--green)" : "var(--red)";
   const area = `${line} L${x(points.length - 1).toFixed(1)},${y(0).toFixed(1)} L${x(0).toFixed(1)},${y(0).toFixed(1)} Z`;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Running total" className="chart">
-      <line x1={PAD.left} x2={W - PAD.right} y1={y(0)} y2={y(0)} stroke="#374151" strokeWidth="1" strokeDasharray="4 4" />
-      <path d={area} fill={colour} opacity="0.15" />
+      <defs>
+        <linearGradient id="eqfade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={colour} stopOpacity="0.28" />
+          <stop offset="100%" stopColor={colour} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <line x1={PAD.left} x2={W - PAD.right} y1={y(0)} y2={y(0)} stroke="#2a3441" strokeWidth="1" strokeDasharray="4 4" />
+      <path d={area} fill="url(#eqfade)" />
       <path d={line} fill="none" stroke={colour} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       <circle cx={x(points.length - 1)} cy={y(last.value)} r="4" fill={colour} />
       <text x={PAD.left} y={H - 6} fontSize="11" fill="var(--muted)">{shortDate(points[0].key)}</text>
@@ -144,13 +152,13 @@ export default function AnalyticsView() {
 
       <div className="card" style={{ marginBottom: 12 }}>
         <div className="label">Net P&amp;L</div>
-        <div className={`big ${cls(realNet)}`}>{money(realNet)}</div>
+        <div className={`big ${cls(realNet)}`}><Money value={realNet} /></div>
         {commTotal > 0 && (
-          <div className="label" style={{ fontSize: 14, marginTop: 4 }}>
+          <div className="label sub" style={{ fontSize: 14, marginTop: 4 }}>
             After {money(commTotal)} commission (trades {money(summary.net)})
           </div>
         )}
-        <div className="label" style={{ fontSize: 14, marginTop: 4 }}>
+        <div className="label sub" style={{ fontSize: 14, marginTop: 4 }}>
           {summary.days} {summary.days === 1 ? "day" : "days"} logged
         </div>
       </div>
