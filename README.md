@@ -33,6 +33,20 @@ after the broker's commission.
 
 Every pull request is checked automatically by `.github/workflows/ci.yml` (type check, tests, build).
 
+## Who can join (invite-only)
+Public sign-up is switched off. The owner makes a one-time invite code in **Settings, Invite someone**, copies the
+ready-made message and sends it. The person opens the app, taps **Join with an invite code**, and enters the code,
+their email and a password. Codes work once, expire (1, 7 or 30 days) and can be cancelled.
+
+- The sign-up rules live in `supabase/functions/signup-with-invite/` (`handler.ts` holds the rules and is tested;
+  `index.ts` connects them to the database). It is deployed to Supabase with "Verify JWT" **off**, because people
+  joining are not signed in yet. It uses the project's service key, which Supabase supplies to the function itself.
+- Guessing is slowed down: after 30 wrong codes in 10 minutes (across everyone) sign-up pauses for a while.
+- **Forgot password** sends a reset email and the app has a "Choose a new password" screen for the link.
+- Making yourself the owner (once): see the note above `app_admins` in `supabase/schema.sql`.
+- For this to be enforced, **"Allow new users to sign up" must be OFF** in Supabase (Authentication, Sign In / Providers).
+  Otherwise someone could still call the sign-up service directly and skip the invite.
+
 ## Database
 Supabase (Postgres). The whole design, including the per-user security rules, is in
 [`supabase/schema.sql`](supabase/schema.sql). To start a fresh copy, run that file once in a new

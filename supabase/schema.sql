@@ -62,6 +62,102 @@ create policy "own rows: insert" on public.pnl_settings for insert to authentica
 create policy "own rows: update" on public.pnl_settings for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 create policy "own rows: delete" on public.pnl_settings for delete to authenticated using (user_id = (select auth.uid()));
 
+-- ---------------------------------------------------------------------------------------------
+-- Invite-only sign-up (added 2026-11-15).
+-- Public sign-up is switched OFF in the Supabase dashboard. People join with a one-time invite code
+-- through the Edge Function supabase/functions/signup-with-invite, which creates the account itself.
+-- ---------------------------------------------------------------------------------------------
+
+-- Who runs Daybook: only these users can create invite codes.
+-- To make yourself the admin, once, after you have signed up (run in the SQL Editor):
+--   insert into public.app_admins (user_id) select id from auth.users where email = 'you@example.com';
+create table public.app_admins (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+alter table public.app_admins enable row level security;
+create policy "admins can see themselves" on public.app_admins
+  for select to authenticated using (user_id = (select auth.uid()));
+
+-- One-time invite codes (like K7QM-X2PA-9WTD) with an expiry; they can be revoked.
+create table public.invites (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  note text check (note is null or char_length(note) <= 80),
+  created_by uuid default auth.uid() references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null,
+  used_at timestamptz,
+  used_by uuid references auth.users(id) on delete set null,
+  revoked_at timestamptz
+);
+create index invites_created_by_idx on public.invites (created_by);
+create index invites_used_by_idx on public.invites (used_by);
+alter table public.invites enable row level security;
+create policy "admins see invites" on public.invites
+  for select to authenticated
+  using (exists (select 1 from public.app_admins a where a.user_id = (select auth.uid())));
+create policy "admins create invites" on public.invites
+  for insert to authenticated
+  with check (exists (select 1 from public.app_admins a where a.user_id = (select auth.uid())));
+create policy "admins revoke invites" on public.invites
+  for update to authenticated
+  using (exists (select 1 from public.app_admins a where a.user_id = (select auth.uid())))
+  with check (exists (select 1 from public.app_admins a where a.user_id = (select auth.uid())));
+-- An admin may only change revoked_at (they cannot "un-use" a code).
+revoke update on public.invites from authenticated, anon;
+grant update (revoked_at) on public.invites to authenticated;
+
+-- A log of bad code attempts, so guessing can be slowed down. Only the sign-up function (service role) uses it,
+-- so it deliberately has no policies (Supabase's advisor shows an info note about that; it is intended).
+create table public.invite_attempts (
+  id bigint generated always as identity primary key,
+  at timestamptz not null default now()
+);
+alter table public.invite_attempts enable row level security;
+create index invite_attempts_at_idx on public.invite_attempts (at);
+
+-- Makes a new invite code. Runs with the caller's own rights, so only admins can use it.
+create or replace function public.create_invite(p_note text default null, p_days integer default 7)
+returns text
+language plpgsql
+security invoker
+set search_path = public, extensions
+as $$
+declare
+  alphabet constant text := 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; -- no look-alikes: I, L, O, 0, 1
+  bytes bytea;
+  raw text;
+  v_code text;
+  i integer;
+begin
+  if not exists (select 1 from public.app_admins where user_id = (select auth.uid())) then
+    raise exception 'Only an admin can create invite codes' using errcode = '42501';
+  end if;
+  if p_days is null or p_days < 1 or p_days > 90 then
+    p_days := 7;
+  end if;
+  loop
+    bytes := gen_random_bytes(12);
+    raw := '';
+    for i in 0..11 loop
+      raw := raw || substr(alphabet, 1 + (get_byte(bytes, i) % 31), 1);
+    end loop;
+    v_code := substr(raw, 1, 4) || '-' || substr(raw, 5, 4) || '-' || substr(raw, 9, 4);
+    begin
+      insert into public.invites (code, note, created_by, expires_at)
+      values (v_code, nullif(btrim(p_note), ''), (select auth.uid()), now() + make_interval(days => p_days));
+      return v_code;
+    exception when unique_violation then
+      null; -- astronomically unlikely: just try another code
+    end;
+  end loop;
+end;
+$$;
+revoke all on function public.create_invite(text, integer) from public, anon;
+grant execute on function public.create_invite(text, integer) to authenticated;
+
 -- History
 -- 2026-11-12  pnl_entries created (trades).
 -- 2026-11-13  pnl_commissions and pnl_settings added; pnl_entries.lot_size added.
+-- 2026-11-15  invite-only sign-up: app_admins, invites, invite_attempts, create_invite().
