@@ -47,6 +47,16 @@ their email and a password. Codes work once, expire (1, 7 or 30 days) and can be
 - For this to be enforced, **"Allow new users to sign up" must be OFF** in Supabase (Authentication, Sign In / Providers).
   Otherwise someone could still call the sign-up service directly and skip the invite.
 
+## Deleting an account
+Settings, **Delete my account**: permanently removes the person's login and everything in it (trades, lot sizes,
+commissions, settings). It asks for the password and the word DELETE, and is hidden behind a button.
+- The rules are in `supabase/functions/delete-account/` (`handler.ts` is tested; `index.ts` connects it to the database).
+  It is deployed with "Verify JWT" **off** because it does its own, stricter check: it looks up the real signed-in person
+  from their login token. Which account is deleted is always decided by that login, never by anything sent in the request.
+- The **only admin cannot delete themselves**, so the app is never left with nobody able to create invite codes.
+- The database does the clean-up: every table that holds personal data is linked to the login with "delete cascades",
+  so removing the login removes the data (tested against the live database with a throwaway user).
+
 ## Database
 Supabase (Postgres). The whole design, including the per-user security rules, is in
 [`supabase/schema.sql`](supabase/schema.sql). To start a fresh copy, run that file once in a new

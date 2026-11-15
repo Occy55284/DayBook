@@ -150,3 +150,8 @@ select.settings-input { width: 100%; }
 .invite-status { color: var(--muted); font-size: 13px; margin-top: 2px; }
 .invite-item.used .invite-code-small, .invite-item.expired .invite-code-small, .invite-item.revoked .invite-code-small { color: var(--muted); text-decoration: line-through; }
 .invite-item.waiting .invite-status { color: var(--green); }
+
+/* Delete my account */
+.danger-card { border: 1px solid #7f1d1d; }
+.b-danger { background: #b91c1c; color: #fff; }
+.b-danger:disabled { opacity: 0.35; }

@@ -11,6 +11,8 @@ import { formatCodeInput } from "@/lib/invites";
 const hash = typeof window !== "undefined" ? window.location.hash : "";
 const OPENED_FROM_RESET_LINK = /[#&]type=recovery\b/.test(hash);
 const RESET_LINK_EXPIRED = /error_code=otp_expired|error=access_denied/.test(hash);
+// Did the person just delete their account? (The delete screen sends them back here with ?deleted=1.)
+const JUST_DELETED = typeof window !== "undefined" && /[?&]deleted=1\b/.test(window.location.search);
 
 type Mode = "signin" | "join" | "forgot";
 type Message = { kind: "error" | "ok"; text: string } | null;
@@ -77,7 +79,11 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [recovering, setRecovering] = useState(OPENED_FROM_RESET_LINK);
   const [mode, setMode] = useState<Mode>(RESET_LINK_EXPIRED ? "forgot" : "signin");
   const [msg, setMsg] = useState<Message>(
-    RESET_LINK_EXPIRED ? { kind: "error", text: "That reset link has expired or was already used. Request a new one." } : null
+    RESET_LINK_EXPIRED
+      ? { kind: "error", text: "That reset link has expired or was already used. Request a new one." }
+      : JUST_DELETED
+        ? { kind: "ok", text: "Your account and all your data have been deleted." }
+        : null
   );
   const [busy, setBusy] = useState(false);
 
@@ -87,6 +93,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [code, setCode] = useState("");
 
   useEffect(() => {
+    if (JUST_DELETED) window.history.replaceState(null, "", window.location.pathname);
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setChecking(false);
