@@ -75,7 +75,7 @@ export default function SettingsForm() {
           Download everything you&apos;ve entered as a spreadsheet file (CSV) to keep a backup or open in Excel.
         </p>
         <button className="b-clear signout" style={{ marginTop: 12 }} onClick={download} disabled={entryCount === 0}>
-          {entryCount === 0 ? "Nothing to download yet" : `Download my data (${entryCount} entries)`}
+          {entryCount === 0 ? "Nothing to download yet" : `Download my data (${entryCount} ${entryCount === 1 ? "entry" : "entries"})`}
         </button>
       </div>
     </>

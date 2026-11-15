@@ -2,6 +2,23 @@
 
 Newest entry first.
 
+## 2026-11-15 — Phase 2B: delete my account
+**Done**
+- Settings has **Delete my account** (hidden behind a button, with a plain warning and a tip to download your data first). The final button stays off until the password is entered and DELETE is typed.
+- Edge Function `delete-account` (deployed, Verify JWT off because it checks the login itself). It finds the real signed-in person from their token, re-checks their password, refuses if they are the only admin, and only then deletes. The account deleted is always the verified person's; no account id is sent or trusted. 18 tests (deliberately broken four ways: deleting whoever the request names, skipping the password, ignoring the only-admin rule, accepting any token; all caught).
+- Proven against the live database, with a throwaway user inside a test that aborts itself: deleting a login removes all their trades, commissions, settings and admin row; a used invite code stays on record but no longer points at them; everyone else's data is untouched.
+- After deleting, the person lands on the sign-in screen with "Your account and all your data have been deleted." and nothing is kept on the phone.
+- Small fix: the download button now says "1 entry", not "1 entries".
+- 99 automated tests. All earlier browser checks and accessibility scans still pass.
+
+**Notes / decisions**
+- The only admin has to make someone else an admin first. Today that is done in the Supabase SQL Editor (see the note above `app_admins` in `supabase/schema.sql`); an in-app way to share admin rights could come later.
+- Data about a deleted person is not kept anywhere in the app (the invite code row keeps only the code and dates).
+- Not tested live end to end from the build machine (it can't reach Supabase's web address); the first real deletion of a test account is the live confirmation.
+
+**Next**
+- Phase 2C: privacy policy, terms and the "not financial advice" notice (needs the owner's name/contact details). Phase 2D: email sender, domain, hosting plans, backups, error monitoring.
+
 ## 2026-11-15 — Phase 2A: invite-only sign-up, forgot password
 **Done**
 - Sign-in screen is now four screens: Sign in, **Join with an invite code**, **Forgot password**, and **Choose a new password** (for the reset-email link). The old open "Create account" button is gone.
