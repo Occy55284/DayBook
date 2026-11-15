@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { LEGAL_VERSION } from "./legal";
 
 // When one of our server functions says no, it explains why in its reply (bad code, wrong password ...).
 // This pulls that explanation out, or gives a general message if the server couldn't be reached.
@@ -17,7 +18,10 @@ export async function explainFunctionError(error: unknown): Promise<string> {
 
 // Join with an invite code, then sign in. Returns a message to show if something went wrong, or null on success.
 export async function joinWithInvite(input: { code: string; email: string; password: string }): Promise<string | null> {
-  const { error } = await supabase.functions.invoke("signup-with-invite", { body: input });
+  // The person has ticked the agreement box; we send which version of the Terms they saw so it can be recorded.
+  const { error } = await supabase.functions.invoke("signup-with-invite", {
+    body: { ...input, acceptedTerms: true, termsVersion: LEGAL_VERSION },
+  });
   if (error) return explainFunctionError(error);
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: input.email.trim().toLowerCase(),

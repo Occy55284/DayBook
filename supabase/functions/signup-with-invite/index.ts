@@ -39,8 +39,14 @@ const store: InviteStore = {
   async markInviteUsed(id, userId) {
     await admin.from("invites").update({ used_by: userId }).eq("id", id);
   },
-  async createUser(email, password) {
-    const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  async createUser(email, password, metadata) {
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      // Kept on the account: which version of the Terms and Privacy policy they agreed to, and when.
+      user_metadata: { terms_version: metadata.termsVersion, terms_accepted_at: metadata.acceptedAt },
+    });
     if (error || !data.user) {
       const code = (error as { code?: string } | null)?.code ?? "";
       const message = error?.message ?? "Could not create the account.";
