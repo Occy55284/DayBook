@@ -3,7 +3,7 @@ import AnalyticsView from "@/components/AnalyticsView";
 export default function Analytics() {
   return (
     <>
-      <div className="title">Analytics</div>
+      <h1 className="title">Analytics</h1>
       <AnalyticsView />
     </>
   );

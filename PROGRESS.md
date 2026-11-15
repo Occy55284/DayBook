@@ -2,6 +2,27 @@
 
 Newest entry first.
 
+## 2026-11-15 — Phase 1: safer, in pounds, accessible, tested
+Result of a full review of the app (see the review notes in the pull request). Plan from here: Phase 2 = ready for other users, Phase 3 = installable app + trader tools (win rate, drawdown, goals, balance), Phase 4 = community side + journal.
+
+**Done**
+- Money is now in pounds (£) everywhere, through one formatter (`lib/format.ts`) so a per-user currency can be added later.
+- Data-overwrite bug fixed: the app now waits for your data before showing any day to tap. Before, on a slow connection you could tap a day, see an empty box and overwrite the real number. If loading fails you get "Couldn't load your data" and Try again, and nothing can be edited.
+- Data is loaded once and shared (`DataProvider`), so switching tabs is instant (no flash of £0.00).
+- A failed save now puts back only that one day, instead of rolling everything back.
+- Clear has a 6-second Undo (restores the amount, lot size and commission).
+- Accessibility: page landmarks and headings, labelled boxes, readable text on coloured days, the entry pop-up is a real dialog (Escape closes it, Tab stays inside, focus returns), spoken names built from the visible text, current tab announced, visible keyboard focus. The automated scan found 0 issues on every screen.
+- Settings: "Download my data" gives a CSV of all trades, lot sizes and commissions.
+- 50 automated tests for the week, commission, totals, money and export maths (`npm test`), plus `npm run typecheck`, and a GitHub Actions check on every pull request (`.github/workflows/ci.yml`).
+- The database design is now saved in the repo (`supabase/schema.sql`) and the README is rewritten.
+
+**Notes / decisions**
+- Loading is all-or-nothing: if any of trades, commissions or settings fail to load, editing is blocked until Try again works.
+- Not done on purpose (needs the owner): tidying the old `main` branch and stale branches, switching sign-ups to invite-only (Phase 2).
+
+**Next**
+- Phase 2 (ready for other users): invite-only sign-up, email confirmation and password reset with a proper email sender, privacy policy and terms, delete-my-account, domain, hosting plans and backups.
+
 ## 2026-11-13 — Monday-to-Friday week, commission on its own Sunday row
 **Done**
 - Weeks are now Monday to Friday (Calendar, Analytics, month grid). The app opens on this week; at the weekend that is the week that just ended.

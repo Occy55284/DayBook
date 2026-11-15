@@ -1,0 +1,25 @@
+# Runs on every pull request and every change to the live branch.
+# A change that doesn't type-check, fails a test or doesn't build shows a red cross and shouldn't be merged.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [claude/friendly-wright-7vw21q, main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
+      - name: Build
+        run: npm run build

@@ -5,7 +5,9 @@ import {
   Bar, Period, barsForPeriod, currentStreak, entriesInPeriod, runningTotal, summarise,
 } from "@/lib/analytics";
 import { realDays } from "@/lib/finance";
-import { money, useCommissions, useTrades } from "@/lib/store";
+import { money } from "@/lib/format";
+import { useData } from "./DataProvider";
+import { LoadError, Skeleton } from "./LoadState";
 
 const cls = (n: number) => (n > 0 ? "pos" : n < 0 ? "neg" : "");
 const shortDate = (key: string) =>
@@ -83,8 +85,7 @@ function EquityChart({ points }: { points: { key: string; value: number }[] }) {
 }
 
 export default function AnalyticsView() {
-  const { trades, error } = useTrades();
-  const { commissions, error: commError } = useCommissions();
+  const { trades, commissions, ready, failed, error, reload } = useData();
   const [mode, setMode] = useState<Period>("month");
   // Start on this week (at the weekend, the week that just ended).
   const [anchor, setAnchor] = useState<Date>(() => new Date());
@@ -112,6 +113,10 @@ export default function AnalyticsView() {
   const bars = useMemo(() => barsForPeriod(trades, mode, anchor), [trades, mode, anchor]);
   const streak = useMemo(() => currentStreak(trades), [trades]);
 
+  // Wait for your real numbers before showing any totals (no flash of £0.00).
+  if (failed) return <LoadError message={error} onRetry={reload} />;
+  if (!ready) return <Skeleton />;
+
   const heading =
     mode === "week" ? formatWeekRange(weekStart(anchor))
     : mode === "month" ? `${monthName(month)} ${year}`
@@ -123,7 +128,7 @@ export default function AnalyticsView() {
     <>
       <div className="seg">
         {(["week", "month", "year", "all"] as Period[]).map((m) => (
-          <button key={m} className={mode === m ? "on" : ""} onClick={() => setMode(m)}>
+          <button key={m} className={mode === m ? "on" : ""} aria-pressed={mode === m} onClick={() => setMode(m)}>
             {m[0].toUpperCase() + m.slice(1)}
           </button>
         ))}
@@ -135,7 +140,7 @@ export default function AnalyticsView() {
         {mode === "all" ? <span style={{ width: 40 }} /> : <button onClick={() => step(1)} aria-label="Next">›</button>}
       </div>
 
-      {(error || commError) && <p className="neg">{error || commError}</p>}
+      {error && <p className="neg" role="alert">{error}</p>}
 
       <div className="card" style={{ marginBottom: 12 }}>
         <div className="label">Net P&amp;L</div>

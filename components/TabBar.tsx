@@ -12,10 +12,15 @@ export default function TabBar() {
   const path = usePathname();
   return (
     <div className="tabbar">
-      <nav>
+      <nav aria-label="Main">
         {TABS.map((t) => (
-          <Link key={t.href} href={t.href} className={path === t.href ? "on" : ""}>
-            <span className="ic">{t.icon}</span>
+          <Link
+            key={t.href}
+            href={t.href}
+            className={path === t.href ? "on" : ""}
+            aria-current={path === t.href ? "page" : undefined}
+          >
+            <span className="ic" aria-hidden="true">{t.icon}</span>
             {t.label}
           </Link>
         ))}
