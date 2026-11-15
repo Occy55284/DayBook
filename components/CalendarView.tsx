@@ -6,6 +6,8 @@ import {
 } from "@/lib/dates";
 import { lastLotBefore, lotText, suggestedCommission, weekNetBeforeSunday } from "@/lib/finance";
 import { money, signed } from "@/lib/format";
+import { heatLevel, maxAbsOf } from "@/lib/heat";
+import Money from "./Money";
 import { useData } from "./DataProvider";
 import { LoadError, Skeleton } from "./LoadState";
 
@@ -180,6 +182,14 @@ export default function CalendarView() {
     : mode === "year" ? String(year) : "All time";
 
   const weekComm = commissions[sundayKey];
+  // Colour strength is compared with the biggest win or loss on screen.
+  const monthPrefix = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const heatMax = maxAbsOf(
+    mode === "week"
+      ? weekDays(monday).map((d) => trades[toKey(d)]).filter((v): v is number => v !== undefined)
+      : Object.entries(trades).filter(([k]) => k.startsWith(monthPrefix)).map(([, v]) => v)
+  );
+  const heatClass = (v: number | undefined) => (v === undefined ? "" : `${v >= 0 ? "win" : "loss"} h${heatLevel(v, heatMax)}`);
 
   return (
     <>
@@ -201,7 +211,7 @@ export default function CalendarView() {
       {error && <p className="neg" role="alert">{error}</p>}
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="label">Total P&amp;L</div>
-        <div className={`big ${cls(total || undefined) || ""}`}>{money(total)}</div>
+        <div className={`big ${cls(total || undefined) || ""}`}><Money value={total} /></div>
         {commTotal > 0 && (
           <span className="stat-sub">After {money(commTotal)} commission (trades {money(tradesTotal)})</span>
         )}
@@ -216,7 +226,7 @@ export default function CalendarView() {
             return (
               <button
                 key={k}
-                className={`weekrow ${k === todayKey ? "today" : ""}`}
+                className={`weekrow ${heatClass(v)} ${k === todayKey ? "today" : ""}`}
                 onClick={() => open(k)}
               >
                 <div className="d">{d.getDate()}<small>{TRADING_DAYS[i]}</small></div>
@@ -264,7 +274,7 @@ export default function CalendarView() {
                     const k = toKey(d);
                     const v = trades[k];
                     const lot = lots[k];
-                    const state = v === undefined ? "" : v >= 0 ? "win" : "loss";
+                    const state = heatClass(v);
                     return (
                       <button
                         key={c}
