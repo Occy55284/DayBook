@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useMemo } from "react";
 import {
-  Commissions, Lots, Settings, Trades, useCommissions, useSettings, useTrades,
+  CapitalEntry, Commissions, Lots, Settings, Trades, useCapital, useCommissions, useSettings, useTrades,
 } from "@/lib/store";
 
 // Loads your data ONCE when you sign in and shares it with every screen,
@@ -14,6 +14,9 @@ type Data = {
   setDay: ReturnType<typeof useTrades>["setDay"];
   setCommission: ReturnType<typeof useCommissions>["setCommission"];
   saveSettings: ReturnType<typeof useSettings>["saveSettings"];
+  capital: CapitalEntry[];
+  addCapital: ReturnType<typeof useCapital>["addCapital"];
+  removeCapital: ReturnType<typeof useCapital>["removeCapital"];
   ready: boolean; // everything has loaded
   failed: boolean; // something did NOT load: screens must not allow editing
   error: string | null; // the latest problem (a failed load or a failed save)
@@ -26,6 +29,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const t = useTrades();
   const c = useCommissions();
   const s = useSettings();
+  const k = useCapital();
 
   const value = useMemo<Data>(
     () => ({
@@ -36,12 +40,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setDay: t.setDay,
       setCommission: c.setCommission,
       saveSettings: s.saveSettings,
-      ready: t.ready && c.ready && s.ready,
-      failed: t.failed || c.failed || s.failed,
-      error: t.error ?? c.error ?? s.error,
-      reload: () => { t.reload(); c.reload(); s.reload(); },
+      capital: k.entries,
+      addCapital: k.addCapital,
+      removeCapital: k.removeCapital,
+      ready: t.ready && c.ready && s.ready && k.ready,
+      failed: t.failed || c.failed || s.failed || k.failed,
+      error: t.error ?? c.error ?? s.error ?? k.error,
+      reload: () => { t.reload(); c.reload(); s.reload(); k.reload(); },
     }),
-    [t, c, s]
+    [t, c, s, k]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

@@ -36,8 +36,9 @@ export default function Privacy() {
           form by the login service, so I can&rsquo;t read it. Also when your account was made and when you last signed in.
         </li>
         <li>
-          <strong>What you enter:</strong> daily profit and loss amounts, lot sizes, Sunday commission amounts and your
-          commission percentage.
+          <strong>What you enter:</strong> daily profit and loss amounts, lot sizes, Sunday commission amounts, your
+          commission percentage, your monthly profit target, and any money you record going into or out of the account
+          (starting balance, deposits, bonuses and withdrawals, with an optional short note).
         </li>
         <li>
           <strong>Your invite:</strong> if you joined with an invite code, the code, when it was used, and any note the

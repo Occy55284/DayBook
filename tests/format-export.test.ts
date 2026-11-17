@@ -53,3 +53,26 @@ describe("CSV export", () => {
     expect(exportFilename(new Date(2026, 10, 5))).toBe("daybook-export-2026-11-05.csv");
   });
 });
+
+describe("buildCsv with capital", () => {
+  it("adds one row per capital entry, using its kind as the type", () => {
+    const lines = buildCsv(
+      { "2026-11-02": 10 }, {}, {},
+      [
+        { id: "a", date: "2026-11-01", kind: "start", amount: 1000, note: "" },
+        { id: "b", date: "2026-11-02", kind: "bonus", amount: 50, note: "welcome" },
+        { id: "c", date: "2026-11-09", kind: "withdrawal", amount: 200, note: "" },
+      ]
+    ).trim().split("\n");
+    expect(lines).toEqual([
+      "date,type,amount,lot_size",
+      "2026-11-01,start,1000,",
+      "2026-11-02,trade,10,",
+      "2026-11-02,bonus,50,",
+      "2026-11-09,withdrawal,200,",
+    ]);
+  });
+  it("still works with no capital argument", () => {
+    expect(buildCsv({ "2026-11-02": 10 }, {}, {})).toBe("date,type,amount,lot_size\n2026-11-02,trade,10,\n");
+  });
+});

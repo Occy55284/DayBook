@@ -6,7 +6,7 @@ import { LoadError, Skeleton } from "./LoadState";
 
 // Your commission percentage (the share your broker takes each Sunday), and a download of all your data.
 export default function SettingsForm() {
-  const { settings, saveSettings, trades, lots, commissions, ready, failed, error, reload } = useData();
+  const { settings, saveSettings, trades, lots, commissions, capital, ready, failed, error, reload } = useData();
   const [pct, setPct] = useState("30");
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -53,7 +53,7 @@ export default function SettingsForm() {
 
   // Build the CSV in the browser and hand it to you as a download.
   function download() {
-    const blob = new Blob([buildCsv(trades, lots, commissions)], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([buildCsv(trades, lots, commissions, capital)], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -64,7 +64,7 @@ export default function SettingsForm() {
     URL.revokeObjectURL(url);
   }
 
-  const entryCount = Object.keys(trades).length + Object.keys(commissions).length;
+  const entryCount = Object.keys(trades).length + Object.keys(commissions).length + capital.length;
 
   return (
     <>
