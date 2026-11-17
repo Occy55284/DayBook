@@ -1,4 +1,5 @@
 import TabBar from "@/components/TabBar";
+import BrandHeader from "@/components/BrandHeader";
 import AuthGate from "@/components/AuthGate";
 import { DataProvider } from "@/components/DataProvider";
 
@@ -8,7 +9,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGate>
       <DataProvider>
-        <main className="app">{children}</main>
+        <main className="app">
+          <BrandHeader />
+          {children}
+        </main>
         <TabBar />
       </DataProvider>
     </AuthGate>

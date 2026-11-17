@@ -1,5 +1,5 @@
 "use client";
-import Logo from "./Logo";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { InputHTMLAttributes } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -169,7 +169,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     <main>
       {mode === "signin" && (
         <form className="login" onSubmit={signIn}>
-          <Logo size={64} />
+          <Image className="logo" src="/logo-mark.png" alt="" width={96} height={96} priority />
           <h1 className="title">Daybook</h1>
           <p className="tagline">Your daily trading journal</p>
           <Field id="email" label="Email" type="email" autoComplete="email" required
