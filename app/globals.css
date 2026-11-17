@@ -17,6 +17,10 @@
 html, body { margin: 0; background: var(--bg); color: var(--text); }
 body { font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; font-feature-settings: "tnum" 1, "cv11" 1; }
 .app { max-width: 480px; margin: 0 auto; min-height: 100dvh; padding: 16px 16px 110px; }
+.brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 2px 0 6px; }
+.brand img { width: 36px; height: 36px; }
+.brand-name { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
+.brand-name span { color: var(--green); }
 .pos { color: var(--green); }
 .neg { color: var(--red); }
 
@@ -89,7 +93,7 @@ body { font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans
 .b-clear { background: #374151; color: #fff; }
 .b-cancel { background: transparent; color: var(--muted); }
 .title { text-align: center; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; margin: 8px 0 18px; }
-.login .logo { align-self: center; margin-bottom: 4px; box-shadow: 0 8px 24px rgba(74, 222, 128, 0.12); border-radius: 16px; }
+.login .logo { align-self: center; margin-bottom: 4px; }
 .tagline { margin: -10px 0 8px; text-align: center; color: var(--muted); }
 .soon { color: var(--muted); text-align: center; margin-top: 60px; font-size: 18px; }
 

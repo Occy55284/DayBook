@@ -164,3 +164,23 @@ Result of a full review of the app (see the review notes in the pull request). P
 - Analytics tab: profit/loss donut, Net PnL, drawdown chart.
 - Accounts switcher and monthly/yearly goals.
 - Make it installable on a phone home screen.
+
+---
+
+## 2026-11-17 — Daybook logo and header
+**Done**
+- Added the new Daybook logo: browser-tab icon (`app/icon.png`), iPhone
+  home-screen icon (`app/apple-icon.png`), and a see-through emblem
+  (`public/logo-mark.png`).
+- New `components/BrandHeader.tsx`: logo + "Daybook" name at the top of every
+  signed-in screen (Calendar, Analytics, Settings), on phone and PC.
+- Sign-in screen now shows the new logo instead of the drawn one; removed the
+  unused `components/Logo.tsx` and the old `app/icon.svg`.
+- Tests (115) pass, typecheck and build pass.
+
+**In progress / next**
+- Optional: swap the full logo (with lettering) into the Settings "About" card.
+
+**Notes / decisions**
+- Header is slim and centred to match the 480px app column.
+
