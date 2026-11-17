@@ -1,29 +1,11 @@
-# GMC Tracker V1
+# DayBook
 
-A simple hospitality charging capture app to replace the manual Excel process.
+This repository holds **Daybook**, a daily trading profit-and-loss journal.
 
-## V1 scope
-- Customer Service submits room requests.
-- Rooms are entered one per line.
-- Standard setup charge: £3.40 per room.
-- Lunch details/cost can be added.
-- Hospitality marks requests as Delivered.
-- Manager/Supervisor marks requests as Approved.
-- Weekly/monthly reporting is generated from approved records.
+The live Daybook app is built from the branch
+[`claude/friendly-wright-7vw21q`](https://github.com/Occy55284/DayBook/tree/claude/friendly-wright-7vw21q).
+Look there for the code, setup steps, tests and the up-to-date progress log.
 
-## Setup
-1. Create a Supabase project.
-2. Run `supabase/schema.sql` in the Supabase SQL editor.
-3. Copy `.env.example` to `.env.local` and add your Supabase URL and anon key.
-4. Run:
-
-```bash
-npm install
-npm run dev
-```
-
-## Pages
-- `/` Dashboard
-- `/new-request` Customer Service form
-- `/queue` Hospitality queue and approval
-- `/reports` Weekly/monthly reports
+The `main` branch used to hold *GMC Tracker*, a hospitality charging app that is
+no longer in use. Its files were removed from `main` in November 2026. The full
+code is still available in this branch's git history if it is ever needed.
