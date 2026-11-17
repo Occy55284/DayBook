@@ -23,6 +23,25 @@ log after each working session so the project history stays current.
 
 ---
 
+## 2026-11-17 — Branded background
+**Done**
+- Added `public/bg-pattern.svg`: a tiled, low-contrast pattern of covered
+  dishes, coffee cups and cutlery, used as the page background.
+- Added `public/logo-watermark.svg`: a large faint logo fixed in the
+  bottom-right corner (opacity set in `body::after` in `app/globals.css`).
+- Updated the `body` rule in `app/globals.css` to layer glow + pattern + base colour.
+- Build passes (needs Supabase env vars set, as before).
+
+**In progress / next**
+- Swap in the real company logo/photo if one is provided (replace the SVGs in
+  `public/`, or point the `url(...)` values in `globals.css` at the new files).
+
+**Notes / decisions**
+- Cards stay white so text remains readable over the pattern.
+- Pure presentation change; no data or server logic touched.
+
+---
+
 ## 2026-06-18 — UI overhaul (professional + vibrant)
 **Done**
 - Reworked `app/globals.css` into a design system: design tokens, vibrant
