@@ -23,6 +23,19 @@ log after each working session so the project history stays current.
 
 ---
 
+## 2026-11-17 — Reverted background pattern
+**Done**
+- Reverted PR #36 (tiled background pattern + corner logo watermark), at the
+  owner's request. Removed `public/bg-pattern.svg`, `public/logo-watermark.svg`
+  and the matching `body` rules in `app/globals.css`. `public/logo.png` is kept.
+
+**Notes / decisions**
+- The background was meant for the Daybook trading journal, which lives on
+  separate branches, not GMC Tracker on `main`. Branding for Daybook (header
+  logo, tab icon) is still to do, once a logo is supplied.
+
+---
+
 ## 2026-07-09 — GDPR full-name enforcement (requestor + approver) + auto progress log
 **Done**
 - Blocked full names on the New Request form: label updated to "Requestor Initials — no
