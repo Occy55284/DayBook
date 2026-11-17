@@ -167,6 +167,34 @@ Result of a full review of the app (see the review notes in the pull request). P
 
 ---
 
+## 2026-11-17 — Monthly profit target with trading-day countdown
+**Done**
+- New setting "Monthly profit target (£)" on the Settings page (empty = no target).
+  Saved in a new nullable column `pnl_settings.monthly_target`.
+- New `TargetCard` on the Calendar and Analytics **Month** views: "£X of £Y",
+  a progress bar, the % done, trading days left (Mon-Fri, counting today until it
+  is logged), and the amount needed per remaining day, with On track / Behind pace.
+  Finished months show "Target reached" or "Missed by £X". With no target set, a
+  link to Settings is shown instead.
+- Maths lives in `lib/target.ts`, with 13 new tests (`tests/target.test.ts`).
+- Saving the commission % now keeps the target (and the other way round).
+
+**Needs doing in the database (before the app code goes live)**
+- `alter table public.pnl_settings add column if not exists monthly_target numeric
+  check (monthly_target is null or monthly_target > 0);` (also recorded in `supabase/schema.sql`).
+  Until it is run, the app cannot load Settings.
+
+**Ideas for later**
+- Daily loss limit warning; win rate / average win vs loss; notes on each day;
+  target line on the Running Total graph; streak badges; monthly summary to share.
+
+**Notes / decisions**
+- Monthly (not weekly/custom) target, counted in trading days (Mon-Fri). Bank
+  holidays are not taken off.
+- "Net" means profit after commission, the same figure as the Total P&L card.
+
+---
+
 ## 2026-11-17 — Daybook logo and header
 **Done**
 - Added the new Daybook logo: browser-tab icon (`app/icon.png`), iPhone

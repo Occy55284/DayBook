@@ -39,6 +39,13 @@ body { font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans
 .bar { height: 10px; background: #9ca3af; border-radius: 6px; margin: 12px 0 6px; overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--green); }
 .goalrow { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
+.target-card { margin-bottom: 16px; }
+.target-card .target-line { font-size: 26px; font-weight: 700; margin-top: 6px; letter-spacing: -0.01em; }
+.target-card .target-line .muted { font-size: 17px; font-weight: 600; }
+.target-card .bar { background: var(--line); height: 12px; }
+.target-card .bar i { transition: width 0.4s ease; }
+.target-behind { color: #fbbf24; }
+.target-empty { display: block; text-decoration: none; margin-bottom: 16px; text-align: center; color: var(--muted); font-weight: 600; font-size: 15px; }
 
 .weekrow { display: flex; align-items: center; gap: 16px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 10px; width: 100%; color: var(--text); text-align: left; font-family: inherit; box-shadow: var(--shadow); }
 .weekrow.win { border-left-color: var(--green); }

@@ -11,8 +11,9 @@ export type Lots = Record<string, number>;
 // Saved in Supabase (table: pnl_commissions).
 export type Commissions = Record<string, number>;
 // Your settings. Saved in Supabase (table: pnl_settings).
-export type Settings = { commissionPct: number };
-export const DEFAULT_SETTINGS: Settings = { commissionPct: 30 };
+// monthlyTarget is your profit goal for a calendar month in pounds, or null when you have not set one.
+export type Settings = { commissionPct: number; monthlyTarget: number | null };
+export const DEFAULT_SETTINGS: Settings = { commissionPct: 30, monthlyTarget: null };
 
 const ACCOUNT = "Main Account";
 
@@ -171,18 +172,23 @@ export function useSettings() {
   const { ready, failed, error, reload } = useLoader(async (cancelled) => {
     const { data, error } = await supabase
       .from("pnl_settings")
-      .select("commission_pct")
+      .select("commission_pct, monthly_target")
       .eq("account", ACCOUNT)
       .maybeSingle();
     if (error) return error.message;
-    if (data && !cancelled()) setSettings({ commissionPct: Number(data.commission_pct) });
+    if (data && !cancelled()) {
+      setSettings({
+        commissionPct: Number(data.commission_pct),
+        monthlyTarget: data.monthly_target === null ? null : Number(data.monthly_target),
+      });
+    }
     return null;
   });
 
   // Returns an error message, or null when it saved fine.
   const saveSettings = useCallback(async (s: Settings): Promise<string | null> => {
     const { error } = await supabase.from("pnl_settings").upsert(
-      { account: ACCOUNT, commission_pct: s.commissionPct, updated_at: new Date().toISOString() },
+      { account: ACCOUNT, commission_pct: s.commissionPct, monthly_target: s.monthlyTarget, updated_at: new Date().toISOString() },
       { onConflict: "user_id,account" }
     );
     if (error) return error.message;

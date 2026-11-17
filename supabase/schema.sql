@@ -38,6 +38,7 @@ create table public.pnl_settings (
   user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   account text not null default 'Main Account',
   commission_pct numeric not null default 30 check (commission_pct >= 0 and commission_pct <= 100),
+  monthly_target numeric check (monthly_target is null or monthly_target > 0), -- profit goal per calendar month (pounds); empty = no target
   updated_at timestamptz not null default now(),
   unique (user_id, account)
 );
@@ -161,3 +162,6 @@ grant execute on function public.create_invite(text, integer) to authenticated;
 -- 2026-11-12  pnl_entries created (trades).
 -- 2026-11-13  pnl_commissions and pnl_settings added; pnl_entries.lot_size added.
 -- 2026-11-15  invite-only sign-up: app_admins, invites, invite_attempts, create_invite().
+-- 2026-11-17  pnl_settings.monthly_target added (nullable). For an existing database run:
+--             alter table public.pnl_settings add column if not exists monthly_target numeric
+--               check (monthly_target is null or monthly_target > 0);

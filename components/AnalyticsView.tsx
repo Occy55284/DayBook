@@ -10,6 +10,7 @@ import { money } from "@/lib/format";
 import { useData } from "./DataProvider";
 import { LoadError, Skeleton } from "./LoadState";
 import Money from "./Money";
+import TargetCard from "./TargetCard";
 
 const cls = (n: number) => (n > 0 ? "pos" : n < 0 ? "neg" : "");
 const shortDate = (key: string) =>
@@ -162,6 +163,8 @@ export default function AnalyticsView() {
           {summary.days} {summary.days === 1 ? "day" : "days"} logged
         </div>
       </div>
+
+      {mode === "month" && <TargetCard net={realNet} year={year} month={month} />}
 
       {entries.length === 0 ? (
         <p className="soon">No trades in this period yet.</p>

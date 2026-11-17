@@ -8,6 +8,7 @@ import { lastLotBefore, lotText, suggestedCommission, weekNetBeforeSunday } from
 import { money, signed } from "@/lib/format";
 import { heatLevel, maxAbsOf } from "@/lib/heat";
 import Money from "./Money";
+import TargetCard from "./TargetCard";
 import { useData } from "./DataProvider";
 import { LoadError, Skeleton } from "./LoadState";
 
@@ -216,6 +217,8 @@ export default function CalendarView() {
           <span className="stat-sub">After {money(commTotal)} commission (trades {money(tradesTotal)})</span>
         )}
       </div>
+
+      {mode === "month" && <TargetCard net={total} year={year} month={month} />}
 
       {mode === "week" && (
         <>
