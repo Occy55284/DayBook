@@ -2,6 +2,7 @@ const variants: Record<string, string> = {
   submitted: 'badge-submitted',
   delivered: 'badge-delivered',
   approved: 'badge-approved',
+  rejected: 'badge-rejected',
 }
 
 export default function StatusBadge({ status }: { status: string }) {

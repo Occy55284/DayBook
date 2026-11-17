@@ -5,7 +5,7 @@ A simple hospitality charging capture app to replace the manual Excel process.
 ## V1 scope
 - Customer Service submits room requests.
 - Rooms are entered one per line.
-- Standard setup charge: £3.99 per room.
+- Standard setup charge: £3.40 per room.
 - Lunch details/cost can be added.
 - Hospitality marks requests as Delivered.
 - Manager/Supervisor marks requests as Approved.

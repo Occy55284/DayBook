@@ -33,12 +33,85 @@ log after each working session so the project history stays current.
 - Build passes (needs Supabase env vars set, as before).
 
 **In progress / next**
-- Swap in the real company logo/photo if one is provided (replace the SVGs in
-  `public/`, or point the `url(...)` values in `globals.css` at the new files).
+- The top bar now uses the real `public/logo.png` (from main). Optionally reuse
+  it for the corner watermark by pointing `body::after` in `globals.css` at it.
 
 **Notes / decisions**
 - Cards stay white so text remains readable over the pattern.
 - Pure presentation change; no data or server logic touched.
+
+---
+
+## 2026-07-09 — GDPR full-name enforcement (requestor + approver) + auto progress log
+**Done**
+- Blocked full names on the New Request form: label updated to "Requestor Initials — no
+  surnames (GDPR)", `pattern="[^\s]+"` added client-side, and `createRequest` in
+  `actions.ts` rejects any name containing whitespace server-side. (PR #23)
+- Extended the same enforcement to the approver/rejecter field on the Queue page: both
+  `approved_by` inputs now carry the same pattern, `updateStatus` in `actions.ts` has a
+  matching server-side check, and the Dashboard "Approved By" column now uses `toInitials()`
+  so existing records with full names are masked. (PR #25)
+- Added `.claude/settings.json` with a `Stop` hook that auto-updates this file at end of
+  each session. Uses `asyncRewake` (exit 2) to re-invoke Claude when today's date is not
+  yet in the log; fires at most once per day. (PR #24)
+
+**In progress / next**
+- PR #25 (approver GDPR fix) open, Vercel preview ready — awaiting merge.
+- Possible follow-ups: CSV/Excel export on Reports, dark mode, mobile card layout for Queue.
+
+**Notes / decisions**
+- GDPR enforcement is two-layer (client `pattern` + server-side regex) on both name fields.
+- `toInitials()` in `lib/calculations.ts` acts as a display-layer fallback for any data
+  that pre-dates the enforcement.
+- The Stop hook lives in `.claude/settings.json` (committed) so it applies automatically to
+  all Claude Code sessions on this project.
+
+---
+
+## 2026-07-01 — Dashboard tweaks, lunch pricing fix, double-submit fix
+**Done**
+- Dashboard "Recent Requests" now shows 15 rows instead of 10, and dates
+  display with the day of week (e.g. `Wed, 01 Jul 2026`) via a new
+  `formatDateWithDay` helper in `lib/calculations.ts`. (PR #13)
+- Requests marked "Lunch required" (at submission or added later from the
+  Hospitality queue) no longer get the standard £3.40 per-room refreshment
+  charge, since lunch already covers it — `refreshment_total` is set to 0
+  in both `createRequest` and `addLunch`. Request detail page's room
+  breakdown updated to reflect £0 per room in that case. (PR #14)
+- Fixed a double-submission bug on the New Request form: the submit button
+  had no protection against double-clicks, so a second click before the
+  redirect completed could send a duplicate request. Added a `SubmitButton`
+  client component (`app/components/SubmitButton.tsx`) using
+  `useFormStatus` to disable the button and show "Submitting…" while
+  pending. Verified in-browser with Playwright. (PR #15)
+
+**In progress / next**
+- No feature work in flight.
+
+**Notes / decisions**
+- `main` had moved on since the last session (request detail pages,
+  `approved_by`, `created_at` ordering, `ROOM_PRICE` now £3.40) — the
+  Dashboard PR was rebased onto latest `main` before merging.
+- Each change shipped as its own PR (#13, #14, #15), all merged same day.
+
+---
+
+## 2026-07-06 — Rejected status, request detail page, initials display
+**Done**
+- Added `Rejected` status to schema (migration run in Supabase).
+- Added `rejected_by` / `rejected_at` columns so rejections are tracked.
+- Reject button added to Delivered items in the queue (alongside Approve), each with an initials input.
+- Request detail page (`/requests/:id`) updated to show who rejected or approved and when.
+- Dashboard "View →" button fixed — was 404ing due to a stale route from a previous PR; now correctly links to `/requests/:id`.
+- Requestor names throughout dashboard and queue now show initials only (full name on hover).
+- `badge-rejected` (red) and `button.danger` styles added.
+
+**In progress / next**
+- No open items.
+
+**Notes / decisions**
+- Next.js 16 requires `params` to be awaited as a Promise; the duplicate `/request/[id]` page used the old sync pattern and was removed.
+- Migration SQL is in `supabase/migrations/20260706_add_rejected_status.sql`.
 
 ---
 

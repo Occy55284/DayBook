@@ -81,21 +81,15 @@ p { color: var(--ink-soft); line-height: 1.55; margin: 0 0 12px; }
 }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-mark {
-  display: grid;
-  place-items: center;
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--indigo) 0%, var(--violet) 55%, var(--pink) 110%);
-  color: #fff;
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 0.02em;
   box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
 }
 .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
 .brand-title { font-weight: 800; font-size: 16px; letter-spacing: -0.01em; }
 .brand-sub { font-size: 12px; color: var(--ink-soft); }
+.share-btn { padding: 9px 16px; font-size: 13px; }
 
 /* ---------- Nav ---------- */
 .nav { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -226,6 +220,10 @@ button.success, .btn-success {
   background: linear-gradient(135deg, var(--emerald) 0%, #059669 100%);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
 }
+button.danger, .btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+}
 .btn-block { width: 100%; justify-content: center; margin-top: 22px; }
 
 /* ---------- Tables ---------- */
@@ -241,6 +239,8 @@ thead th {
 }
 tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
 tbody tr:hover td { background: #fafbff; }
+.row-link td a { color: inherit; text-decoration: none; display: block; }
+.row-link:hover td { background: #f0f3ff; cursor: pointer; }
 td pre {
   margin: 0 0 4px;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -269,6 +269,31 @@ td pre {
 .badge-submitted { color: #b45309; background: #fef3c7; }
 .badge-delivered { color: #0e7490; background: #cffafe; }
 .badge-approved { color: #047857; background: #d1fae5; }
+.badge-rejected { color: #b91c1c; background: #fee2e2; }
+
+/* ---------- Charts ---------- */
+.chart-tooltip {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 10px 13px;
+  font-size: 13px;
+}
+.chart-tooltip strong { display: block; margin-bottom: 4px; font-size: 13px; }
+.chart-tooltip-total { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--line-soft); font-weight: 700; color: var(--ink); }
+
+/* ---------- Error banner ---------- */
+.error-banner {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
 
 /* ---------- Misc ---------- */
 .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
