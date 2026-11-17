@@ -167,6 +167,39 @@ Result of a full review of the app (see the review notes in the pull request). P
 
 ---
 
+## 2026-11-17 — Monthly profit target + return on your money
+**Done**
+- **Monthly profit target:** new setting on the Settings page (empty = no target), saved in
+  the new nullable column `pnl_settings.monthly_target`. A `TargetCard` on the Calendar and
+  Analytics **Month** views shows "£X of £Y", a progress bar, the % done, trading days left
+  (Mon-Fri, counting today until it is logged), the amount needed per remaining day, and
+  On track / Behind pace. Finished months show "Target reached" or "Missed by £X".
+- **Return on your money:** new `CapitalCard` on Analytics with an **Add capital** button.
+  Entry types: starting balance, own money added, bonus, withdrawal (amount, date, optional
+  note), with a History list and Remove. Shows the all-time % up on your own money, the %
+  counting the bonus too, and the account balance. Saved in the new table `pnl_capital`.
+- Maths in `lib/target.ts` and `lib/capital.ts`; 23 new tests (138 total).
+- "Download my data" now includes the capital rows; privacy page wording updated to list
+  the target and capital entries.
+
+**Needs doing in the database (before the app code goes live)**
+- Run the two statements in `supabase/schema.sql` (the `pnl_capital` table with its
+  row-level-security policies, and `alter table public.pnl_settings add column if not exists
+  monthly_target ...`). Live project: `gmc-tracker` (it also still holds the old
+  `gmc_requests` table with 283 rows - do not drop that). Until then the app cannot load.
+
+**Notes / decisions**
+- % = profit after commission (all-time) / money put in (start + own money added).
+  Withdrawals do NOT shrink that base, so taking profit out does not flatter the %; they
+  only reduce the balance. Balance = money in + bonus + profit - withdrawals.
+- Target is monthly, counted in trading days; bank holidays are not taken off.
+
+**Ideas for later**
+- Daily loss limit warning; win rate / average win vs loss; notes on each day; target line
+  on the Running Total graph; streak badges; monthly summary to share; target as a % of capital.
+
+---
+
 ## 2026-11-17 — Daybook logo and header
 **Done**
 - Added the new Daybook logo: browser-tab icon (`app/icon.png`), iPhone

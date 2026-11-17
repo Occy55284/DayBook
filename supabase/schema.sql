@@ -38,14 +38,30 @@ create table public.pnl_settings (
   user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   account text not null default 'Main Account',
   commission_pct numeric not null default 30 check (commission_pct >= 0 and commission_pct <= 100),
+  monthly_target numeric check (monthly_target is null or monthly_target > 0), -- profit goal per calendar month (pounds); empty = no target
   updated_at timestamptz not null default now(),
   unique (user_id, account)
+);
+
+-- Money you put into (or take out of) the account, one row per event, so the app can show your % return.
+--   start = starting balance, deposit = your own money added, bonus = an introduction bonus,
+--   withdrawal = money taken out. The amount is always above 0; the kind says which way it goes.
+create table public.pnl_capital (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  account text not null default 'Main Account',
+  entry_date date not null,
+  kind text not null check (kind in ('start', 'deposit', 'bonus', 'withdrawal')),
+  amount numeric not null check (amount > 0),
+  note text check (note is null or char_length(note) <= 100),
+  created_at timestamptz not null default now()
 );
 
 -- Row-level security: own rows only.
 alter table public.pnl_entries enable row level security;
 alter table public.pnl_commissions enable row level security;
 alter table public.pnl_settings enable row level security;
+alter table public.pnl_capital enable row level security;
 
 create policy "own rows: select" on public.pnl_entries for select to authenticated using (user_id = (select auth.uid()));
 create policy "own rows: insert" on public.pnl_entries for insert to authenticated with check (user_id = (select auth.uid()));
@@ -61,6 +77,11 @@ create policy "own rows: select" on public.pnl_settings for select to authentica
 create policy "own rows: insert" on public.pnl_settings for insert to authenticated with check (user_id = (select auth.uid()));
 create policy "own rows: update" on public.pnl_settings for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 create policy "own rows: delete" on public.pnl_settings for delete to authenticated using (user_id = (select auth.uid()));
+
+create policy "own rows: select" on public.pnl_capital for select to authenticated using (user_id = (select auth.uid()));
+create policy "own rows: insert" on public.pnl_capital for insert to authenticated with check (user_id = (select auth.uid()));
+create policy "own rows: update" on public.pnl_capital for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+create policy "own rows: delete" on public.pnl_capital for delete to authenticated using (user_id = (select auth.uid()));
 
 -- ---------------------------------------------------------------------------------------------
 -- Invite-only sign-up (added 2026-11-15).
@@ -161,3 +182,7 @@ grant execute on function public.create_invite(text, integer) to authenticated;
 -- 2026-11-12  pnl_entries created (trades).
 -- 2026-11-13  pnl_commissions and pnl_settings added; pnl_entries.lot_size added.
 -- 2026-11-15  invite-only sign-up: app_admins, invites, invite_attempts, create_invite().
+-- 2026-11-17  pnl_capital added (starting balance, deposits, bonuses, withdrawals).
+-- 2026-11-17  pnl_settings.monthly_target added (nullable). For an existing database run:
+--             alter table public.pnl_settings add column if not exists monthly_target numeric
+--               check (monthly_target is null or monthly_target > 0);

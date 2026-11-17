@@ -11,8 +11,13 @@ export type Lots = Record<string, number>;
 // Saved in Supabase (table: pnl_commissions).
 export type Commissions = Record<string, number>;
 // Your settings. Saved in Supabase (table: pnl_settings).
-export type Settings = { commissionPct: number };
-export const DEFAULT_SETTINGS: Settings = { commissionPct: 30 };
+// monthlyTarget is your profit goal for a calendar month in pounds, or null when you have not set one.
+export type Settings = { commissionPct: number; monthlyTarget: number | null };
+export const DEFAULT_SETTINGS: Settings = { commissionPct: 30, monthlyTarget: null };
+
+// Money in or out of the account (see lib/capital.ts for how it is used).
+export type CapitalKind = "start" | "deposit" | "bonus" | "withdrawal";
+export type CapitalEntry = { id: string; date: string; kind: CapitalKind; amount: number; note: string };
 
 const ACCOUNT = "Main Account";
 
@@ -171,18 +176,23 @@ export function useSettings() {
   const { ready, failed, error, reload } = useLoader(async (cancelled) => {
     const { data, error } = await supabase
       .from("pnl_settings")
-      .select("commission_pct")
+      .select("commission_pct, monthly_target")
       .eq("account", ACCOUNT)
       .maybeSingle();
     if (error) return error.message;
-    if (data && !cancelled()) setSettings({ commissionPct: Number(data.commission_pct) });
+    if (data && !cancelled()) {
+      setSettings({
+        commissionPct: Number(data.commission_pct),
+        monthlyTarget: data.monthly_target === null ? null : Number(data.monthly_target),
+      });
+    }
     return null;
   });
 
   // Returns an error message, or null when it saved fine.
   const saveSettings = useCallback(async (s: Settings): Promise<string | null> => {
     const { error } = await supabase.from("pnl_settings").upsert(
-      { account: ACCOUNT, commission_pct: s.commissionPct, updated_at: new Date().toISOString() },
+      { account: ACCOUNT, commission_pct: s.commissionPct, monthly_target: s.monthlyTarget, updated_at: new Date().toISOString() },
       { onConflict: "user_id,account" }
     );
     if (error) return error.message;
@@ -191,4 +201,59 @@ export function useSettings() {
   }, []);
 
   return { settings, ready, failed, error, reload, saveSettings };
+}
+
+export function useCapital() {
+  const [entries, setEntries] = useState<CapitalEntry[]>([]);
+  const entriesRef = useRef(entries);
+  entriesRef.current = entries;
+
+  const { ready, failed, error, setError, reload } = useLoader(async (cancelled) => {
+    const all: CapitalEntry[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from("pnl_capital")
+        .select("id, entry_date, kind, amount, note")
+        .eq("account", ACCOUNT)
+        .order("entry_date", { ascending: true })
+        .order("created_at", { ascending: true })
+        .range(from, from + 999);
+      if (error) return error.message;
+      data.forEach((r) =>
+        all.push({ id: r.id, date: r.entry_date, kind: r.kind as CapitalKind, amount: Number(r.amount), note: r.note ?? "" })
+      );
+      if (data.length < 1000) break;
+    }
+    if (!cancelled()) setEntries(all);
+    return null;
+  });
+
+  // Saves first, then shows it, so a failed save never leaves a made-up line on screen.
+  // Returns an error message, or null when it saved fine.
+  const addCapital = useCallback(async (e: Omit<CapitalEntry, "id">): Promise<string | null> => {
+    setError(null);
+    const { data, error } = await supabase
+      .from("pnl_capital")
+      .insert({ account: ACCOUNT, entry_date: e.date, kind: e.kind, amount: e.amount, note: e.note.trim() || null })
+      .select("id")
+      .single();
+    if (error) return error.message;
+    setEntries((list) =>
+      [...list, { ...e, id: data.id }].sort((a, b) => a.date.localeCompare(b.date))
+    );
+    return null;
+  }, [setError]);
+
+  const removeCapital = useCallback(async (id: string) => {
+    const before = entriesRef.current;
+    setEntries((list) => list.filter((x) => x.id !== id));
+    setError(null);
+    const { error } = await supabase.from("pnl_capital").delete().eq("id", id);
+    if (error) {
+      setEntries(before);
+      setError(`Couldn't remove: ${error.message}`);
+    }
+  }, [setError]);
+
+  return { entries, addCapital, removeCapital, ready, failed, error, reload };
 }
