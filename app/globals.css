@@ -18,7 +18,7 @@ html, body { margin: 0; background: var(--bg); color: var(--text); }
 body { font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; font-feature-settings: "tnum" 1, "cv11" 1; }
 .app { max-width: 480px; margin: 0 auto; min-height: 100dvh; padding: 16px 16px 110px; }
 .brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 2px 0 6px; }
-.brand img { width: 36px; height: 36px; }
+.brand img { width: 52px; height: 52px; }
 .brand-name { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
 .brand-name span { color: var(--green); }
 .pos { color: var(--green); }

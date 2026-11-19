@@ -169,7 +169,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     <main>
       {mode === "signin" && (
         <form className="login" onSubmit={signIn}>
-          <Image className="logo" src="/logo-mark.png" alt="" width={96} height={96} priority />
+          <Image className="logo" src="/logo-mark.png" alt="" width={150} height={150} priority />
           <h1 className="title">Daybook</h1>
           <p className="tagline">Your daily trading journal</p>
           <Field id="email" label="Email" type="email" autoComplete="email" required
