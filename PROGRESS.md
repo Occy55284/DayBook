@@ -167,6 +167,22 @@ Result of a full review of the app (see the review notes in the pull request). P
 
 ---
 
+## 2026-11-19 — Bubbles on the Week view
+**Done**
+- The Calendar **Week** view now has a `List | Bubbles` switch (remembered separately from the
+  Month choice). Bubbles show the five days plus Sunday's commission, larger than on the
+  Month view (`unitPx` 72). A day with nothing entered is a faint dashed "ghost" bubble with a
+  + (tap to add a trade); the commission is amber (a dashed ghost until entered, tap to open
+  the commission box). Wins green, losses red, size follows the £ amount, as on Month.
+- `BubbleView` now takes `items` (`value: null` = ghost, `kind: "day" | "commission"`) plus
+  `unitPx`, `labelMinPx`, `hint`, `emptyText`; Month usage updated to match.
+- 1 new bubble-layout test for a week-shaped input (157 tests total).
+
+**Notes / decisions**
+- Ghost bubbles use the smallest size so a quiet day never competes with a real result.
+
+---
+
 ## 2026-11-19 — New "Terminal" look + daily Bubbles view
 **Done**
 - Owner chose the "Terminal" direction (after comparing Aurora, Terminal and a light Ledger

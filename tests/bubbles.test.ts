@@ -84,4 +84,15 @@ describe("packBubbles", () => {
           expect(Math.hypot(p.items[i].x - p.items[j].x, p.items[i].y - p.items[j].y)).toBeGreaterThanOrEqual(p.items[i].r + p.items[j].r + GAP - 1e-6);
     }
   });
+
+  it("works for a week: a few real days, empty days (0) and a commission", () => {
+    const week = [74.35, -12.2, 0, 0, 0, 32.72]; // Mon, Tue, then three empty days, then Sunday's commission
+    const p = packBubbles(week);
+    expect(p.items).toHaveLength(6);
+    expect(p.items[2].r).toBeCloseTo(MIN_RADIUS, 10); // an empty day gets the smallest bubble
+    expect(p.items[0].r).toBeCloseTo(1, 10);          // the biggest day is the biggest bubble
+    for (let i = 0; i < p.items.length; i++)
+      for (let j = i + 1; j < p.items.length; j++)
+        expect(Math.hypot(p.items[i].x - p.items[j].x, p.items[i].y - p.items[j].y)).toBeGreaterThanOrEqual(p.items[i].r + p.items[j].r + GAP - 1e-6);
+  });
 });
