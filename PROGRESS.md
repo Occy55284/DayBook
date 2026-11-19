@@ -167,6 +167,24 @@ Result of a full review of the app (see the review notes in the pull request). P
 
 ---
 
+## 2026-11-19 — Target pace line on the Running Total graph
+**Done**
+- On Analytics, in the **Month** view with a monthly target set, the Running Total graph
+  now spans the whole month's trading days and shows a dashed amber "pace" line rising
+  steadily from £0 to the target at month end (labelled "Target £X"). The green/red line
+  being above the dashed line means you are ahead of pace.
+- Other views (Week / Year / All) and months with no target set use the original graph,
+  unchanged.
+- New `pacePoints` in `lib/target.ts` places each day by trading-day position (weekend
+  commission shares the Friday's position); 6 new tests (144 total).
+
+**Notes / decisions**
+- The old graph spaced logged days evenly; the new one is by calendar trading day so the
+  pace line is meaningful. A single logged day now draws from the left edge.
+- Pace is a straight line over Mon-Fri days; bank holidays are not removed.
+
+---
+
 ## 2026-11-19 — New Daybook logo (bull and bear)
 **Done**
 - Replaced the logo with the new bull-and-bear / candlesticks / open-book design:
