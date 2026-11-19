@@ -167,6 +167,30 @@ Result of a full review of the app (see the review notes in the pull request). P
 
 ---
 
+## 2026-11-19 — New "Terminal" look + daily Bubbles view
+**Done**
+- Owner chose the "Terminal" direction (after comparing Aurora, Terminal and a light Ledger
+  style as prototypes). It is now the app's look, in `app/terminal.css` (loaded after
+  `globals.css`): JetBrains Mono type, grid-paper background, neon green/red glow, corner
+  brackets on cards, `// LABELS`, blinking cursor on the name, glowing tab bar.
+  Added `@fontsource-variable/jetbrains-mono`. Privacy/terms pages stay in the Inter font.
+- **Bubbles view:** on the Calendar **Month** view a "Grid | Bubbles" switch (choice remembered
+  in the browser). One floating neon-glass bubble per traded day: green = win, red = loss,
+  size follows the £ amount (area grows with the amount, with a minimum so small days stay
+  readable), today has a dashed ring, tapping a bubble opens that day's entry box.
+  Gentle floating motion, switched off for people who ask their device for reduced motion.
+- Packing in `lib/bubbles.ts` (no overlaps, compact round cloud, deterministic) with
+  12 new tests (156 total). Component: `components/BubbleView.tsx`.
+
+**Notes / decisions**
+- Screenshots were taken with a faked signed-in session and a dead database address, so no
+  real data was touched.
+- Bubbles show trading days only; Sunday commission is not a bubble (the totals include it).
+- Possible next: count-up numbers on the totals, a celebration when the target is reached,
+  a light theme switch (the Ledger prototype is in git history of PR #42).
+
+---
+
 ## 2026-11-19 — Target pace line on the Running Total graph
 **Done**
 - On Analytics, in the **Month** view with a monthly target set, the Running Total graph
