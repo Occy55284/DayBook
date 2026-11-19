@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function BrandHeader() {
   return (
     <header className="brand">
-      <Image src="/logo-mark.png" alt="" width={36} height={36} priority />
+      <Image src="/logo-mark.png" alt="" width={52} height={52} priority />
       <span className="brand-name">
         Day<span>book</span>
       </span>

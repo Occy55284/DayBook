@@ -167,6 +167,22 @@ Result of a full review of the app (see the review notes in the pull request). P
 
 ---
 
+## 2026-11-19 — New Daybook logo (bull and bear)
+**Done**
+- Replaced the logo with the new bull-and-bear / candlesticks / open-book design:
+  browser-tab icon (`app/icon.png`), iPhone home-screen icon (`app/apple-icon.png`)
+  and the see-through emblem used in the header and on the sign-in screen
+  (`public/logo-mark.png`). The emblem is cut from the supplied picture without its
+  "Daybook" lettering; the name is still shown as text next to it.
+- Emblem made larger (header 36px -> 52px, sign-in 96px -> 150px) because the new
+  artwork has more detail.
+- Tests (138), typecheck and build pass.
+
+**Notes / decisions**
+- To change the logo again, replace those three image files (keep the same names).
+
+---
+
 ## 2026-11-17 — Monthly profit target + return on your money
 **Done**
 - **Monthly profit target:** new setting on the Settings page (empty = no target), saved in
