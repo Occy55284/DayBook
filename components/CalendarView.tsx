@@ -9,6 +9,7 @@ import { money, signed } from "@/lib/format";
 import { heatLevel, maxAbsOf } from "@/lib/heat";
 import Money from "./Money";
 import BubbleView from "./BubbleView";
+import type { BubbleItem } from "./BubbleView";
 import TargetCard from "./TargetCard";
 import { useData } from "./DataProvider";
 import { LoadError, Skeleton } from "./LoadState";
@@ -42,6 +43,15 @@ export default function CalendarView() {
   function chooseMonthView(v: "grid" | "bubbles") {
     setMonthView(v);
     try { localStorage.setItem("daybook-month-view", v); } catch { /* ignore */ }
+  }
+  // The Week view can be the list of days or bubbles; remembered separately from the Month choice.
+  const [weekView, setWeekView] = useState<"list" | "bubbles">("list");
+  useEffect(() => {
+    try { if (localStorage.getItem("daybook-week-view") === "bubbles") setWeekView("bubbles"); } catch { /* keep the list */ }
+  }, []);
+  function chooseWeekView(v: "list" | "bubbles") {
+    setWeekView(v);
+    try { localStorage.setItem("daybook-week-view", v); } catch { /* ignore */ }
   }
   const [text, setText] = useState("");
   const [lotInput, setLotInput] = useState("");
@@ -193,6 +203,10 @@ export default function CalendarView() {
     : mode === "year" ? String(year) : "All time";
 
   const weekComm = commissions[sundayKey];
+  const weekBubbles: BubbleItem[] = [
+    ...weekDays(monday).map((d) => ({ key: toKey(d), value: trades[toKey(d)] ?? null, kind: "day" as const })),
+    { key: sundayKey, value: weekComm ?? null, kind: "commission" as const },
+  ];
   // Colour strength is compared with the biggest win or loss on screen.
   const monthPrefix = `${year}-${String(month + 1).padStart(2, "0")}`;
   const heatMax = maxAbsOf(
@@ -231,6 +245,25 @@ export default function CalendarView() {
       {mode === "month" && <TargetCard net={total} year={year} month={month} />}
 
       {mode === "week" && (
+        <div className="view-switch" role="group" aria-label="Week view style">
+          <button type="button" className={weekView === "list" ? "on" : ""} aria-pressed={weekView === "list"} onClick={() => chooseWeekView("list")}>List</button>
+          <button type="button" className={weekView === "bubbles" ? "on" : ""} aria-pressed={weekView === "bubbles"} onClick={() => chooseWeekView("bubbles")}>Bubbles</button>
+        </div>
+      )}
+
+      {mode === "week" && weekView === "bubbles" && (
+        <BubbleView
+          items={weekBubbles}
+          todayKey={todayKey}
+          onOpen={(key, kind) => (kind === "commission" ? openCommission(key) : open(key))}
+          unitPx={72}
+          labelMinPx={24}
+          hint="Bigger bubble = bigger £ amount. Tap a bubble to open that day. A dashed bubble has nothing entered yet; the amber one is Sunday's commission."
+          emptyText="Nothing this week yet."
+        />
+      )}
+
+      {mode === "week" && weekView === "list" && (
         <>
           {weekDays(monday).map((d, i) => {
             const k = toKey(d);
@@ -281,9 +314,9 @@ export default function CalendarView() {
 
       {mode === "month" && monthView === "bubbles" && (
         <BubbleView
-          entries={Object.entries(trades).filter(([k]) => k.startsWith(monthPrefix)).map(([key, value]) => ({ key, value }))}
+          items={Object.entries(trades).filter(([k]) => k.startsWith(monthPrefix)).map(([key, value]) => ({ key, value, kind: "day" as const }))}
           todayKey={todayKey}
-          onOpen={open}
+          onOpen={(key) => open(key)}
         />
       )}
 

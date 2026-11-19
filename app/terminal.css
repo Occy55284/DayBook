@@ -84,3 +84,10 @@ body {
 }
 @media (prefers-reduced-motion: reduce) { .bubble { animation: none; } }
 .bubble-hint { text-align: center; margin: 10px 0 4px; }
+
+/* Week view extras: dashed "ghost" bubbles for days with nothing entered, amber for Sunday's commission */
+.bubble.comm { --c: 245, 158, 11; }
+.bubble.ghost { --c: 111, 154, 130; border-style: dashed; border-color: rgba(var(--c), .7); background: rgba(255,255,255,.015); box-shadow: none; }
+.bubble.ghost .ba { color: rgba(var(--c), 1); text-shadow: none; font-size: calc(var(--amt, 13px) * 1.25); font-weight: 600; }
+.bubble.ghost:hover, .bubble.ghost:focus-visible { border-color: var(--green); box-shadow: 0 0 22px rgba(61, 255, 139, .3); }
+.bubble.comm.ghost { --c: 200, 140, 40; }
