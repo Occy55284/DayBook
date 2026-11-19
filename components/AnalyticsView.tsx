@@ -5,6 +5,7 @@ import {
   Bar, Period, barsForPeriod, currentStreak, entriesInPeriod, runningTotal, summarise,
 } from "@/lib/analytics";
 import { realDays } from "@/lib/finance";
+import { pacePoints } from "@/lib/target";
 import { smoothPath } from "@/lib/curve";
 import { money } from "@/lib/format";
 import { useData } from "./DataProvider";
@@ -94,8 +95,51 @@ function EquityChart({ points }: { points: { key: string; value: number }[] }) {
   );
 }
 
+// Chart 2b: the same running total, laid out across the whole month's trading days, with a dashed
+// "pace" line rising steadily from £0 to your target. Above the dashed line = ahead of pace.
+export function TargetEquityChart({ points, target, year, month }: {
+  points: { key: string; value: number }[]; target: number; year: number; month: number;
+}) {
+  const pts = pacePoints(points, year, month);
+  const TOP = 24; // a little more room above, for the "Target" label
+  const plotH = H - TOP - PAD.bottom;
+  const values = pts.map((p) => p.y);
+  const top = Math.max(0, target, ...values);
+  const bottom = Math.min(0, ...values);
+  const span = top - bottom || 1;
+  const x = (f: number) => PAD.left + f * (W - PAD.left - PAD.right);
+  const y = (v: number) => TOP + ((top - v) / span) * plotH;
+  const last = pts[pts.length - 1];
+  const colour = last.y >= 0 ? "var(--green)" : "var(--red)";
+  const line = smoothPath(pts.map((p) => ({ x: x(p.x), y: y(p.y) })));
+  const area = `${line} L${x(last.x).toFixed(1)},${y(0).toFixed(1)} L${x(0).toFixed(1)},${y(0).toFixed(1)} Z`;
+  const first = new Date(year, month, 1);
+  const end = new Date(year, month + 1, 0);
+  const dayLabel = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Running total against the pace needed for your monthly target" className="chart">
+      <defs>
+        <linearGradient id="eqfade2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={colour} stopOpacity="0.28" />
+          <stop offset="100%" stopColor={colour} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <line x1={x(0)} x2={x(1)} y1={y(0)} y2={y(0)} stroke="#2a3441" strokeWidth="1" strokeDasharray="4 4" />
+      <path d={area} fill="url(#eqfade2)" />
+      <line x1={x(0)} y1={y(0)} x2={x(1)} y2={y(target)} stroke="#fbbf24" strokeWidth="1.8" strokeDasharray="5 4" strokeOpacity="0.9" />
+      <circle cx={x(1)} cy={y(target)} r="3.5" fill="#fbbf24" />
+      <text x={x(1)} y={y(target) - 8} textAnchor="end" fontSize="11" fontWeight="700" fill="#fbbf24">Target {Number.isInteger(target) ? `£${target.toLocaleString("en-GB")}` : money(target)}</text>
+      <path d={line} fill="none" stroke={colour} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={x(last.x)} cy={y(last.y)} r="4" fill={colour} />
+      <text x={PAD.left} y={H - 6} fontSize="11" fill="var(--muted)">{dayLabel(first)}</text>
+      <text x={W - PAD.right} y={H - 6} textAnchor="end" fontSize="11" fill="var(--muted)">{dayLabel(end)}</text>
+    </svg>
+  );
+}
+
 export default function AnalyticsView() {
-  const { trades, commissions, ready, failed, error, reload } = useData();
+  const { trades, commissions, settings, ready, failed, error, reload } = useData();
   const [mode, setMode] = useState<Period>("month");
   // Start on this week (at the weekend, the week that just ended).
   const [anchor, setAnchor] = useState<Date>(() => new Date());
@@ -205,7 +249,16 @@ export default function AnalyticsView() {
 
           <div className="card">
             <div className="label">Running total</div>
-            <EquityChart points={curve} />
+            {mode === "month" && settings.monthlyTarget !== null ? (
+              <>
+                <TargetEquityChart points={curve} target={settings.monthlyTarget} year={year} month={month} />
+                <p className="amount-hint muted" style={{ marginTop: 4 }}>
+                  The dashed line is the steady pace to reach your target by the end of the month. Above it means you are ahead.
+                </p>
+              </>
+            ) : (
+              <EquityChart points={curve} />
+            )}
           </div>
         </>
       )}

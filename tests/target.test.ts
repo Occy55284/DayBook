@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countTradingDays, monthTargetProgress } from "../lib/target";
+import { countTradingDays, monthTargetProgress, pacePoints } from "../lib/target";
 
 const d = (y: number, m: number, day: number) => new Date(y, m - 1, day);
 // November 2026: 1st is a Sunday, the 30th is a Monday. It has 21 trading days.
@@ -93,5 +93,49 @@ describe("monthTargetProgress", () => {
     expect(p.status).toBe("notStarted");
     expect(p.daysLeft).toBe(p.totalDays); // December 2026 = 23 trading days
     expect(p.totalDays).toBe(23);
+  });
+});
+
+describe("pacePoints (running total laid out across the month's trading days)", () => {
+  // November 2026 has 21 trading days. Mon 2 Nov is trading day 1.
+  const nov = (running: { key: string; value: number }[]) => pacePoints(running, 2026, 10, );
+
+  it("always starts at the left edge at 0", () => {
+    expect(nov([])).toEqual([{ x: 0, y: 0 }]);
+  });
+
+  it("places each logged day by how many trading days into the month it is", () => {
+    const p = nov([{ key: "2026-11-02", value: 100 }, { key: "2026-11-04", value: 250 }]);
+    expect(p).toHaveLength(3);
+    expect(p[1].x).toBeCloseTo(1 / 21, 10);
+    expect(p[1].y).toBe(100);
+    expect(p[2].x).toBeCloseTo(3 / 21, 10);
+    expect(p[2].y).toBe(250);
+  });
+
+  it("the last trading day of the month is at the right edge", () => {
+    const p = nov([{ key: "2026-11-30", value: 500 }]); // Mon 30 Nov = day 21
+    expect(p[p.length - 1].x).toBeCloseTo(1, 10);
+  });
+
+  it("a Sunday commission shares the Friday's x, and the later value wins", () => {
+    // Fri 6 Nov = day 5; Sun 8 Nov is still 5 days in.
+    const p = nov([{ key: "2026-11-06", value: 400 }, { key: "2026-11-08", value: 340 }]);
+    expect(p).toHaveLength(2); // origin + one point
+    expect(p[1].x).toBeCloseTo(5 / 21, 10);
+    expect(p[1].y).toBe(340);
+  });
+
+  it("x only ever moves forward", () => {
+    const p = nov([
+      { key: "2026-11-03", value: 10 }, { key: "2026-11-06", value: 20 }, { key: "2026-11-08", value: 15 },
+      { key: "2026-11-09", value: 30 },
+    ]);
+    for (let i = 1; i < p.length; i++) expect(p[i].x).toBeGreaterThan(p[i - 1].x);
+  });
+
+  it("ignores days that are not in the month", () => {
+    const p = nov([{ key: "2026-10-30", value: 999 }, { key: "2026-11-02", value: 5 }]);
+    expect(p.map((q) => q.y)).toEqual([0, 5]);
   });
 });

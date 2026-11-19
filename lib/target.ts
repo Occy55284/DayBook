@@ -1,4 +1,4 @@
-import { addDays, isTradingDay } from "./dates";
+import { addDays, fromKey, isTradingDay } from "./dates";
 
 // Monthly profit target: how far along you are, and how many trading days are left.
 // Trading days are Monday to Friday. Bank holidays are not taken off.
@@ -70,4 +70,24 @@ export function monthTargetProgress(opts: {
   }
 
   return { target, net, pct, remaining, daysLeft, totalDays, perDay, phase, status };
+}
+
+// Points for the Running Total graph when a target is set (Month view).
+// x is how far through the month's trading days you are, from 0 (start) to 1 (last trading day);
+// y is your running total. It always starts at 0 so the line begins at the left edge.
+// A Saturday or Sunday (such as the Sunday commission) sits at the same x as the Friday before it,
+// and when two points share an x the later one wins, so x always moves forward.
+export type PacePoint = { x: number; y: number };
+
+export function pacePoints(running: { key: string; value: number }[], year: number, month: number): PacePoint[] {
+  const start = new Date(year, month, 1);
+  const total = countTradingDays(start, new Date(year, month + 1, 0));
+  const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const byX = new Map<number, number>();
+  byX.set(0, 0);
+  for (const r of running) {
+    if (!r.key.startsWith(prefix)) continue;
+    byX.set(countTradingDays(start, fromKey(r.key)) / total, r.value);
+  }
+  return [...byX.entries()].sort((a, b) => a[0] - b[0]).map(([x, y]) => ({ x, y }));
 }
