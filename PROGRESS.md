@@ -167,6 +167,24 @@ Result of a full review of the app (see the review notes in the pull request). P
 
 ---
 
+## 2026-11-19 — Design exploration (work in progress, nothing chosen yet)
+**Done**
+- Audited the current look (flat slate cards, Inter, one green accent: the standard dark
+  finance-app style) and built three switchable prototype themes in `app/themes.css`,
+  applied only when `<html data-theme="a|b|c">` is set, so the live look is unchanged:
+  A Aurora (glass + glow + floating tab bar), B Terminal (mono type, grid paper, neon,
+  corner brackets), C Ledger (light cream paper, serif numerals).
+- Added three fonts: `@fontsource-variable/space-grotesk`, `jetbrains-mono`, `fraunces`.
+- Screenshot method: run the app with `NEXT_PUBLIC_SUPABASE_URL=http://localhost:9` and fake
+  a signed-in session in the browser (no real database is contacted).
+
+**In progress / next**
+- Waiting for the owner to choose a direction (or a mix). Then: keep only the chosen theme,
+  make it the default, add a `hero` class to the main total card instead of `:has()`,
+  drop unused fonts/themes, and add polish (count-up numbers, target-reached celebration).
+
+---
+
 ## 2026-11-19 — Target pace line on the Running Total graph
 **Done**
 - On Analytics, in the **Month** view with a monthly target set, the Running Total graph
