@@ -8,6 +8,7 @@ import { lastLotBefore, lotText, suggestedCommission, weekNetBeforeSunday } from
 import { money, signed } from "@/lib/format";
 import { heatLevel, maxAbsOf } from "@/lib/heat";
 import Money from "./Money";
+import BubbleView from "./BubbleView";
 import TargetCard from "./TargetCard";
 import { useData } from "./DataProvider";
 import { LoadError, Skeleton } from "./LoadState";
@@ -33,6 +34,15 @@ export default function CalendarView() {
   // Start on this week (at the weekend that is the week that just ended, so you can add its commission).
   const [anchor, setAnchor] = useState<Date>(() => new Date());
   const [editing, setEditing] = useState<Editing>(null);
+  // Month view can show the grid of day squares or floating bubbles; the choice is remembered.
+  const [monthView, setMonthView] = useState<"grid" | "bubbles">("grid");
+  useEffect(() => {
+    try { if (localStorage.getItem("daybook-month-view") === "bubbles") setMonthView("bubbles"); } catch { /* storage blocked: keep the grid */ }
+  }, []);
+  function chooseMonthView(v: "grid" | "bubbles") {
+    setMonthView(v);
+    try { localStorage.setItem("daybook-month-view", v); } catch { /* ignore */ }
+  }
   const [text, setText] = useState("");
   const [lotInput, setLotInput] = useState("");
   const [commText, setCommText] = useState("");
@@ -263,6 +273,21 @@ export default function CalendarView() {
       )}
 
       {mode === "month" && (
+        <div className="view-switch" role="group" aria-label="Month view style">
+          <button type="button" className={monthView === "grid" ? "on" : ""} aria-pressed={monthView === "grid"} onClick={() => chooseMonthView("grid")}>Grid</button>
+          <button type="button" className={monthView === "bubbles" ? "on" : ""} aria-pressed={monthView === "bubbles"} onClick={() => chooseMonthView("bubbles")}>Bubbles</button>
+        </div>
+      )}
+
+      {mode === "month" && monthView === "bubbles" && (
+        <BubbleView
+          entries={Object.entries(trades).filter(([k]) => k.startsWith(monthPrefix)).map(([key, value]) => ({ key, value }))}
+          todayKey={todayKey}
+          onOpen={open}
+        />
+      )}
+
+      {mode === "month" && monthView === "grid" && (
         <>
           <div className="dow" aria-hidden="true">{TRADING_DAYS.map((d) => <div key={d}>{d}</div>)}</div>
           {monthGrid(year, month).map((row, r) => {

@@ -1,10 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/inter";
-import "@fontsource-variable/space-grotesk";
 import "@fontsource-variable/jetbrains-mono";
-import "@fontsource-variable/fraunces";
 import "./globals.css";
-import "./themes.css";
+import "./terminal.css";
 
 export const metadata: Metadata = {
   title: "Daybook",
@@ -14,7 +12,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0b0f14",
+  themeColor: "#04070a",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

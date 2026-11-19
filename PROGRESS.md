@@ -167,21 +167,27 @@ Result of a full review of the app (see the review notes in the pull request). P
 
 ---
 
-## 2026-11-19 — Design exploration (work in progress, nothing chosen yet)
+## 2026-11-19 — New "Terminal" look + daily Bubbles view
 **Done**
-- Audited the current look (flat slate cards, Inter, one green accent: the standard dark
-  finance-app style) and built three switchable prototype themes in `app/themes.css`,
-  applied only when `<html data-theme="a|b|c">` is set, so the live look is unchanged:
-  A Aurora (glass + glow + floating tab bar), B Terminal (mono type, grid paper, neon,
-  corner brackets), C Ledger (light cream paper, serif numerals).
-- Added three fonts: `@fontsource-variable/space-grotesk`, `jetbrains-mono`, `fraunces`.
-- Screenshot method: run the app with `NEXT_PUBLIC_SUPABASE_URL=http://localhost:9` and fake
-  a signed-in session in the browser (no real database is contacted).
+- Owner chose the "Terminal" direction (after comparing Aurora, Terminal and a light Ledger
+  style as prototypes). It is now the app's look, in `app/terminal.css` (loaded after
+  `globals.css`): JetBrains Mono type, grid-paper background, neon green/red glow, corner
+  brackets on cards, `// LABELS`, blinking cursor on the name, glowing tab bar.
+  Added `@fontsource-variable/jetbrains-mono`. Privacy/terms pages stay in the Inter font.
+- **Bubbles view:** on the Calendar **Month** view a "Grid | Bubbles" switch (choice remembered
+  in the browser). One floating neon-glass bubble per traded day: green = win, red = loss,
+  size follows the £ amount (area grows with the amount, with a minimum so small days stay
+  readable), today has a dashed ring, tapping a bubble opens that day's entry box.
+  Gentle floating motion, switched off for people who ask their device for reduced motion.
+- Packing in `lib/bubbles.ts` (no overlaps, compact round cloud, deterministic) with
+  12 new tests (156 total). Component: `components/BubbleView.tsx`.
 
-**In progress / next**
-- Waiting for the owner to choose a direction (or a mix). Then: keep only the chosen theme,
-  make it the default, add a `hero` class to the main total card instead of `:has()`,
-  drop unused fonts/themes, and add polish (count-up numbers, target-reached celebration).
+**Notes / decisions**
+- Screenshots were taken with a faked signed-in session and a dead database address, so no
+  real data was touched.
+- Bubbles show trading days only; Sunday commission is not a bubble (the totals include it).
+- Possible next: count-up numbers on the totals, a celebration when the target is reached,
+  a light theme switch (the Ledger prototype is in git history of PR #42).
 
 ---
 
