@@ -2,6 +2,135 @@
 
 Newest entry first.
 
+## 2026-11-23 — Hide option for "Return on your money" + progress log tidy
+**Done**
+- The **Return on your money** card on Analytics has a **Hide / Show** button, for screen
+  sharing. When hidden, the figures are not on the page at all (no % return, profit, balance,
+  bonus %, history list or add form), only "••••" and a note. The choice is remembered on the
+  device; until it has been read the card starts hidden, so a screen share never flashes the
+  numbers. Display split out to `components/CapitalView.tsx` (the wrapper stays in
+  `CapitalCard.tsx`); `vitest.config.ts` added so component tests can use the `@/` imports.
+- Moved this session's progress entries from the bottom of this file to the top (newest first,
+  as the header says); they had been appended below the oldest entry by mistake.
+
+**Notes / decisions**
+- Only this card is hidden. Other cards (Net P&L, monthly target) still show profit amounts.
+  A single "privacy mode" for the whole app is a possible next step.
+
+## 2026-11-19 — Bubbles on the Week view
+**Done**
+- The Calendar **Week** view now has a `List | Bubbles` switch (remembered separately from the
+  Month choice). Bubbles show the five days plus Sunday's commission, larger than on the
+  Month view (`unitPx` 72). A day with nothing entered is a faint dashed "ghost" bubble with a
+  + (tap to add a trade); the commission is amber (a dashed ghost until entered, tap to open
+  the commission box). Wins green, losses red, size follows the £ amount, as on Month.
+- `BubbleView` now takes `items` (`value: null` = ghost, `kind: "day" | "commission"`) plus
+  `unitPx`, `labelMinPx`, `hint`, `emptyText`; Month usage updated to match.
+- 1 new bubble-layout test for a week-shaped input (157 tests total).
+
+**Notes / decisions**
+- Ghost bubbles use the smallest size so a quiet day never competes with a real result.
+
+## 2026-11-19 — New "Terminal" look + daily Bubbles view
+**Done**
+- Owner chose the "Terminal" direction (after comparing Aurora, Terminal and a light Ledger
+  style as prototypes). It is now the app's look, in `app/terminal.css` (loaded after
+  `globals.css`): JetBrains Mono type, grid-paper background, neon green/red glow, corner
+  brackets on cards, `// LABELS`, blinking cursor on the name, glowing tab bar.
+  Added `@fontsource-variable/jetbrains-mono`. Privacy/terms pages stay in the Inter font.
+- **Bubbles view:** on the Calendar **Month** view a "Grid | Bubbles" switch (choice remembered
+  in the browser). One floating neon-glass bubble per traded day: green = win, red = loss,
+  size follows the £ amount (area grows with the amount, with a minimum so small days stay
+  readable), today has a dashed ring, tapping a bubble opens that day's entry box.
+  Gentle floating motion, switched off for people who ask their device for reduced motion.
+- Packing in `lib/bubbles.ts` (no overlaps, compact round cloud, deterministic) with
+  12 new tests (156 total). Component: `components/BubbleView.tsx`.
+
+**Notes / decisions**
+- Screenshots were taken with a faked signed-in session and a dead database address, so no
+  real data was touched.
+- Bubbles show trading days only; Sunday commission is not a bubble (the totals include it).
+- Possible next: count-up numbers on the totals, a celebration when the target is reached,
+  a light theme switch (the Ledger prototype is in git history of PR #42).
+
+## 2026-11-19 — Target pace line on the Running Total graph
+**Done**
+- On Analytics, in the **Month** view with a monthly target set, the Running Total graph
+  now spans the whole month's trading days and shows a dashed amber "pace" line rising
+  steadily from £0 to the target at month end (labelled "Target £X"). The green/red line
+  being above the dashed line means you are ahead of pace.
+- Other views (Week / Year / All) and months with no target set use the original graph,
+  unchanged.
+- New `pacePoints` in `lib/target.ts` places each day by trading-day position (weekend
+  commission shares the Friday's position); 6 new tests (144 total).
+
+**Notes / decisions**
+- The old graph spaced logged days evenly; the new one is by calendar trading day so the
+  pace line is meaningful. A single logged day now draws from the left edge.
+- Pace is a straight line over Mon-Fri days; bank holidays are not removed.
+
+## 2026-11-19 — New Daybook logo (bull and bear)
+**Done**
+- Replaced the logo with the new bull-and-bear / candlesticks / open-book design:
+  browser-tab icon (`app/icon.png`), iPhone home-screen icon (`app/apple-icon.png`)
+  and the see-through emblem used in the header and on the sign-in screen
+  (`public/logo-mark.png`). The emblem is cut from the supplied picture without its
+  "Daybook" lettering; the name is still shown as text next to it.
+- Emblem made larger (header 36px -> 52px, sign-in 96px -> 150px) because the new
+  artwork has more detail.
+- Tests (138), typecheck and build pass.
+
+**Notes / decisions**
+- To change the logo again, replace those three image files (keep the same names).
+
+## 2026-11-17 — Monthly profit target + return on your money
+**Done**
+- **Monthly profit target:** new setting on the Settings page (empty = no target), saved in
+  the new nullable column `pnl_settings.monthly_target`. A `TargetCard` on the Calendar and
+  Analytics **Month** views shows "£X of £Y", a progress bar, the % done, trading days left
+  (Mon-Fri, counting today until it is logged), the amount needed per remaining day, and
+  On track / Behind pace. Finished months show "Target reached" or "Missed by £X".
+- **Return on your money:** new `CapitalCard` on Analytics with an **Add capital** button.
+  Entry types: starting balance, own money added, bonus, withdrawal (amount, date, optional
+  note), with a History list and Remove. Shows the all-time % up on your own money, the %
+  counting the bonus too, and the account balance. Saved in the new table `pnl_capital`.
+- Maths in `lib/target.ts` and `lib/capital.ts`; 23 new tests (138 total).
+- "Download my data" now includes the capital rows; privacy page wording updated to list
+  the target and capital entries.
+
+**Needs doing in the database (before the app code goes live)**
+- Run the two statements in `supabase/schema.sql` (the `pnl_capital` table with its
+  row-level-security policies, and `alter table public.pnl_settings add column if not exists
+  monthly_target ...`). Live project: `gmc-tracker` (it also still holds the old
+  `gmc_requests` table with 283 rows - do not drop that). Until then the app cannot load.
+
+**Notes / decisions**
+- % = profit after commission (all-time) / money put in (start + own money added).
+  Withdrawals do NOT shrink that base, so taking profit out does not flatter the %; they
+  only reduce the balance. Balance = money in + bonus + profit - withdrawals.
+- Target is monthly, counted in trading days; bank holidays are not taken off.
+
+**Ideas for later**
+- Daily loss limit warning; win rate / average win vs loss; notes on each day; target line
+  on the Running Total graph; streak badges; monthly summary to share; target as a % of capital.
+
+## 2026-11-17 — Daybook logo and header
+**Done**
+- Added the new Daybook logo: browser-tab icon (`app/icon.png`), iPhone
+  home-screen icon (`app/apple-icon.png`), and a see-through emblem
+  (`public/logo-mark.png`).
+- New `components/BrandHeader.tsx`: logo + "Daybook" name at the top of every
+  signed-in screen (Calendar, Analytics, Settings), on phone and PC.
+- Sign-in screen now shows the new logo instead of the drawn one; removed the
+  unused `components/Logo.tsx` and the old `app/icon.svg`.
+- Tests (115) pass, typecheck and build pass.
+
+**In progress / next**
+- Optional: swap the full logo (with lettering) into the Settings "About" card.
+
+**Notes / decisions**
+- Header is slim and centred to match the 480px app column.
+
 ## 2026-11-15 — Phase 2C: privacy policy, terms and the agreement
 **Done**
 - New public pages `/privacy` and `/terms` (readable without signing in), in plain English, written from what the app really does. The app screens moved into a route group so only they sit behind sign-in; web addresses are unchanged.
@@ -164,130 +293,3 @@ Result of a full review of the app (see the review notes in the pull request). P
 - Analytics tab: profit/loss donut, Net PnL, drawdown chart.
 - Accounts switcher and monthly/yearly goals.
 - Make it installable on a phone home screen.
-
----
-
-## 2026-11-19 — Bubbles on the Week view
-**Done**
-- The Calendar **Week** view now has a `List | Bubbles` switch (remembered separately from the
-  Month choice). Bubbles show the five days plus Sunday's commission, larger than on the
-  Month view (`unitPx` 72). A day with nothing entered is a faint dashed "ghost" bubble with a
-  + (tap to add a trade); the commission is amber (a dashed ghost until entered, tap to open
-  the commission box). Wins green, losses red, size follows the £ amount, as on Month.
-- `BubbleView` now takes `items` (`value: null` = ghost, `kind: "day" | "commission"`) plus
-  `unitPx`, `labelMinPx`, `hint`, `emptyText`; Month usage updated to match.
-- 1 new bubble-layout test for a week-shaped input (157 tests total).
-
-**Notes / decisions**
-- Ghost bubbles use the smallest size so a quiet day never competes with a real result.
-
----
-
-## 2026-11-19 — New "Terminal" look + daily Bubbles view
-**Done**
-- Owner chose the "Terminal" direction (after comparing Aurora, Terminal and a light Ledger
-  style as prototypes). It is now the app's look, in `app/terminal.css` (loaded after
-  `globals.css`): JetBrains Mono type, grid-paper background, neon green/red glow, corner
-  brackets on cards, `// LABELS`, blinking cursor on the name, glowing tab bar.
-  Added `@fontsource-variable/jetbrains-mono`. Privacy/terms pages stay in the Inter font.
-- **Bubbles view:** on the Calendar **Month** view a "Grid | Bubbles" switch (choice remembered
-  in the browser). One floating neon-glass bubble per traded day: green = win, red = loss,
-  size follows the £ amount (area grows with the amount, with a minimum so small days stay
-  readable), today has a dashed ring, tapping a bubble opens that day's entry box.
-  Gentle floating motion, switched off for people who ask their device for reduced motion.
-- Packing in `lib/bubbles.ts` (no overlaps, compact round cloud, deterministic) with
-  12 new tests (156 total). Component: `components/BubbleView.tsx`.
-
-**Notes / decisions**
-- Screenshots were taken with a faked signed-in session and a dead database address, so no
-  real data was touched.
-- Bubbles show trading days only; Sunday commission is not a bubble (the totals include it).
-- Possible next: count-up numbers on the totals, a celebration when the target is reached,
-  a light theme switch (the Ledger prototype is in git history of PR #42).
-
----
-
-## 2026-11-19 — Target pace line on the Running Total graph
-**Done**
-- On Analytics, in the **Month** view with a monthly target set, the Running Total graph
-  now spans the whole month's trading days and shows a dashed amber "pace" line rising
-  steadily from £0 to the target at month end (labelled "Target £X"). The green/red line
-  being above the dashed line means you are ahead of pace.
-- Other views (Week / Year / All) and months with no target set use the original graph,
-  unchanged.
-- New `pacePoints` in `lib/target.ts` places each day by trading-day position (weekend
-  commission shares the Friday's position); 6 new tests (144 total).
-
-**Notes / decisions**
-- The old graph spaced logged days evenly; the new one is by calendar trading day so the
-  pace line is meaningful. A single logged day now draws from the left edge.
-- Pace is a straight line over Mon-Fri days; bank holidays are not removed.
-
----
-
-## 2026-11-19 — New Daybook logo (bull and bear)
-**Done**
-- Replaced the logo with the new bull-and-bear / candlesticks / open-book design:
-  browser-tab icon (`app/icon.png`), iPhone home-screen icon (`app/apple-icon.png`)
-  and the see-through emblem used in the header and on the sign-in screen
-  (`public/logo-mark.png`). The emblem is cut from the supplied picture without its
-  "Daybook" lettering; the name is still shown as text next to it.
-- Emblem made larger (header 36px -> 52px, sign-in 96px -> 150px) because the new
-  artwork has more detail.
-- Tests (138), typecheck and build pass.
-
-**Notes / decisions**
-- To change the logo again, replace those three image files (keep the same names).
-
----
-
-## 2026-11-17 — Monthly profit target + return on your money
-**Done**
-- **Monthly profit target:** new setting on the Settings page (empty = no target), saved in
-  the new nullable column `pnl_settings.monthly_target`. A `TargetCard` on the Calendar and
-  Analytics **Month** views shows "£X of £Y", a progress bar, the % done, trading days left
-  (Mon-Fri, counting today until it is logged), the amount needed per remaining day, and
-  On track / Behind pace. Finished months show "Target reached" or "Missed by £X".
-- **Return on your money:** new `CapitalCard` on Analytics with an **Add capital** button.
-  Entry types: starting balance, own money added, bonus, withdrawal (amount, date, optional
-  note), with a History list and Remove. Shows the all-time % up on your own money, the %
-  counting the bonus too, and the account balance. Saved in the new table `pnl_capital`.
-- Maths in `lib/target.ts` and `lib/capital.ts`; 23 new tests (138 total).
-- "Download my data" now includes the capital rows; privacy page wording updated to list
-  the target and capital entries.
-
-**Needs doing in the database (before the app code goes live)**
-- Run the two statements in `supabase/schema.sql` (the `pnl_capital` table with its
-  row-level-security policies, and `alter table public.pnl_settings add column if not exists
-  monthly_target ...`). Live project: `gmc-tracker` (it also still holds the old
-  `gmc_requests` table with 283 rows - do not drop that). Until then the app cannot load.
-
-**Notes / decisions**
-- % = profit after commission (all-time) / money put in (start + own money added).
-  Withdrawals do NOT shrink that base, so taking profit out does not flatter the %; they
-  only reduce the balance. Balance = money in + bonus + profit - withdrawals.
-- Target is monthly, counted in trading days; bank holidays are not taken off.
-
-**Ideas for later**
-- Daily loss limit warning; win rate / average win vs loss; notes on each day; target line
-  on the Running Total graph; streak badges; monthly summary to share; target as a % of capital.
-
----
-
-## 2026-11-17 — Daybook logo and header
-**Done**
-- Added the new Daybook logo: browser-tab icon (`app/icon.png`), iPhone
-  home-screen icon (`app/apple-icon.png`), and a see-through emblem
-  (`public/logo-mark.png`).
-- New `components/BrandHeader.tsx`: logo + "Daybook" name at the top of every
-  signed-in screen (Calendar, Analytics, Settings), on phone and PC.
-- Sign-in screen now shows the new logo instead of the drawn one; removed the
-  unused `components/Logo.tsx` and the old `app/icon.svg`.
-- Tests (115) pass, typecheck and build pass.
-
-**In progress / next**
-- Optional: swap the full logo (with lettering) into the Settings "About" card.
-
-**Notes / decisions**
-- Header is slim and centred to match the 480px app column.
-
