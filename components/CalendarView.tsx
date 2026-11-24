@@ -5,9 +5,9 @@ import {
   monthGrid, monthName, toKey, weekDays, weekStart,
 } from "@/lib/dates";
 import { lastLotBefore, lotText, suggestedCommission, weekNetBeforeSunday } from "@/lib/finance";
-import { money, signed } from "@/lib/format";
 import { heatLevel, maxAbsOf } from "@/lib/heat";
 import Money from "./Money";
+import { useFmt } from "./Privacy";
 import BubbleView from "./BubbleView";
 import type { BubbleItem } from "./BubbleView";
 import TargetCard from "./TargetCard";
@@ -30,6 +30,7 @@ function sumPrefix(map: DayMap, prefix: string) {
 
 export default function CalendarView() {
   const { trades, lots, commissions, settings, setDay, setCommission, ready, failed, error, reload } = useData();
+  const { money, signed } = useFmt();
   const today = new Date();
   const [mode, setMode] = useState<Mode>("week");
   // Start on this week (at the weekend that is the week that just ended, so you can add its commission).

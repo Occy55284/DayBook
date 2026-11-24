@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import { toKey } from "@/lib/dates";
-import { money } from "@/lib/format";
 import { monthTargetProgress } from "@/lib/target";
 import { useData } from "./DataProvider";
+import { usePrivacy, useFmt } from "./Privacy";
 
 const days = (n: number) => `${n} trading ${n === 1 ? "day" : "days"}`;
 
@@ -28,6 +28,8 @@ export default function TargetCard({ net, year, month }: { net: number; year: nu
 export function TargetView({ target, net, year, month, today, todayLogged }: {
   target: number | null; net: number; year: number; month: number; today: Date; todayLogged: boolean;
 }) {
+  const { money, plainPct } = useFmt();
+  const { hidden } = usePrivacy();
   // No target yet: a gentle nudge to Settings.
   if (target === null) {
     return (
@@ -54,17 +56,15 @@ export function TargetView({ target, net, year, month, today, todayLogged }: {
         <span className="muted"> of {money(target)}</span>
       </div>
       <div
-        className="bar"
+        className={`bar ${hidden ? "masked" : ""}`}
         role="progressbar"
         aria-label="Progress towards monthly target"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(width)}
+        {...(hidden ? {} : { "aria-valuemin": 0, "aria-valuemax": 100, "aria-valuenow": Math.round(width) })}
       >
-        <i style={{ width: `${width}%` }} />
+        <i style={{ width: hidden ? "100%" : `${width}%` }} />
       </div>
       <div className="goalrow">
-        <span>{Math.round(p.pct)}%</span>
+        <span>{plainPct(p.pct)}</span>
         <span>{right}</span>
       </div>
       {p.perDay !== null && (p.status === "onTrack" || p.status === "behind" || p.status === "notStarted") && (

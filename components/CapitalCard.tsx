@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { realDays } from "@/lib/finance";
 import { useData } from "./DataProvider";
 import CapitalView from "./CapitalView";
+import { usePrivacy } from "./Privacy";
 
 const KEY = "daybook-hide-return";
 
@@ -11,6 +12,7 @@ const KEY = "daybook-hide-return";
 export default function CapitalCard() {
   const { trades, commissions, capital, addCapital, removeCapital } = useData();
   const net = Object.values(realDays(trades, commissions)).reduce((s, v) => s + v, 0);
+  const privacy = usePrivacy();
 
   // `null` = the saved choice has not been read yet. Until then the card counts as hidden, so a
   // screen share never catches the figures flashing up for a moment before the choice is applied.
@@ -33,8 +35,8 @@ export default function CapitalCard() {
       today={new Date()}
       onAdd={addCapital}
       onRemove={removeCapital}
-      hidden={hidden ?? true}
-      onToggleHidden={toggle}
+      hidden={(hidden ?? true) || privacy.hidden}
+      onToggleHidden={privacy.hidden ? undefined : toggle}
     />
   );
 }

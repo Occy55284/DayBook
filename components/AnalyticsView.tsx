@@ -7,10 +7,10 @@ import {
 import { realDays } from "@/lib/finance";
 import { pacePoints } from "@/lib/target";
 import { smoothPath } from "@/lib/curve";
-import { money } from "@/lib/format";
 import { useData } from "./DataProvider";
 import { LoadError, Skeleton } from "./LoadState";
 import Money from "./Money";
+import { useFmt } from "./Privacy";
 import CapitalCard from "./CapitalCard";
 import TargetCard from "./TargetCard";
 
@@ -100,6 +100,7 @@ function EquityChart({ points }: { points: { key: string; value: number }[] }) {
 export function TargetEquityChart({ points, target, year, month }: {
   points: { key: string; value: number }[]; target: number; year: number; month: number;
 }) {
+  const { moneyCompact } = useFmt();
   const pts = pacePoints(points, year, month);
   const TOP = 24; // a little more room above, for the "Target" label
   const plotH = H - TOP - PAD.bottom;
@@ -129,7 +130,7 @@ export function TargetEquityChart({ points, target, year, month }: {
       <path d={area} fill="url(#eqfade2)" />
       <line x1={x(0)} y1={y(0)} x2={x(1)} y2={y(target)} stroke="#fbbf24" strokeWidth="1.8" strokeDasharray="5 4" strokeOpacity="0.9" />
       <circle cx={x(1)} cy={y(target)} r="3.5" fill="#fbbf24" />
-      <text x={x(1)} y={y(target) - 8} textAnchor="end" fontSize="11" fontWeight="700" fill="#fbbf24">Target {Number.isInteger(target) ? `£${target.toLocaleString("en-GB")}` : money(target)}</text>
+      <text x={x(1)} y={y(target) - 8} textAnchor="end" fontSize="11" fontWeight="700" fill="#fbbf24">Target {moneyCompact(target)}</text>
       <path d={line} fill="none" stroke={colour} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       <circle cx={x(last.x)} cy={y(last.y)} r="4" fill={colour} />
       <text x={PAD.left} y={H - 6} fontSize="11" fill="var(--muted)">{dayLabel(first)}</text>
@@ -140,6 +141,7 @@ export function TargetEquityChart({ points, target, year, month }: {
 
 export default function AnalyticsView() {
   const { trades, commissions, settings, ready, failed, error, reload } = useData();
+  const { money } = useFmt();
   const [mode, setMode] = useState<Period>("month");
   // Start on this week (at the weekend, the week that just ended).
   const [anchor, setAnchor] = useState<Date>(() => new Date());
