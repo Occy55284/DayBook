@@ -1,5 +1,6 @@
 import TabBar from "@/components/TabBar";
 import BrandHeader from "@/components/BrandHeader";
+import AccountStrip from "@/components/AccountStrip";
 import AuthGate from "@/components/AuthGate";
 import { DataProvider } from "@/components/DataProvider";
 import { PrivacyProvider } from "@/components/Privacy";
@@ -14,6 +15,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <PrivacyProvider>
           <main className="app">
             <BrandHeader />
+            <AccountStrip />
             {children}
           </main>
           <TabBar />

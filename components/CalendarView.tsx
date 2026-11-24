@@ -4,8 +4,8 @@ import {
   TRADING_DAYS, addDays, commissionSunday, formatWeekRange, fromKey,
   monthGrid, monthName, toKey, weekDays, weekStart,
 } from "@/lib/dates";
-import { allTimeNet, lastLotBefore, lotText, suggestedCommission, weekNetBeforeSunday } from "@/lib/finance";
-import { capitalSummary } from "@/lib/capital";
+import { lastLotBefore, lotText, suggestedCommission, weekNetBeforeSunday } from "@/lib/finance";
+import { accountBalance } from "@/lib/capital";
 import { lotStep } from "@/lib/lots";
 import { heatLevel, maxAbsOf } from "@/lib/heat";
 import Money from "./Money";
@@ -486,9 +486,9 @@ export default function CalendarView() {
                   onKeyDown={(e) => e.key === "Enter" && save()}
                 />
                 {lotInvalid && <p className="neg amount-hint" role="alert">Enter a number above 0, e.g. 0.01</p>}
-                {capital.length > 0 && !privacy.hidden && (
+                {accountBalance(capital, trades, commissions) !== null && !privacy.hidden && (
                   <p className="amount-hint muted">
-                    Your balance supports {lotText(lotStep(capitalSummary(capital, allTimeNet(trades, commissions)).balance).lot)} lots (0.01 per £1,000).
+                    Your balance supports {lotText(lotStep(accountBalance(capital, trades, commissions)!).lot)} lots (0.01 per £1,000).
                   </p>
                 )}
               </>

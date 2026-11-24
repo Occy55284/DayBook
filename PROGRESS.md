@@ -2,6 +2,25 @@
 
 Newest entry first.
 
+## 2026-11-24 — Account value on every screen
+**Done**
+- A slim **Account value** strip under the logo on every signed-in screen (Calendar, Analytics,
+  Settings): the total the account is worth now = own money + bonus + profit after commission -
+  withdrawals. It is the same number as "Account balance" on the Return card and the balance the lot
+  size uses. Masked by privacy mode ("£•••••"); waits for the real numbers before showing, so it never
+  flashes a wrong total. With no capital entered it shows a small link to Analytics instead of a number.
+- One shared calculation `accountBalance()` in `lib/capital.ts`, now used by the strip, the lot size
+  card and the entry-box lot hint (so they can never disagree). `components/AccountView.tsx` (display)
+  and `components/AccountStrip.tsx` (data).
+- 197 tests (7 new): balance maths incl. negative totals, the strip text, and that it starts masked.
+
+**Separate pull request, same day**
+- GMC Tracker removed from `main` (PR #46; owner confirmed). The old `gmc_requests` data in Supabase
+  was left untouched at the owner's choice.
+
+**Notes**
+- No database changes.
+
 ## 2026-11-24 — Privacy mode, target celebration, lot size tracker
 **Done**
 - **Privacy mode:** a button at the top right of every signed-in screen. When on, every £ amount and
