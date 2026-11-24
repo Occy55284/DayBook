@@ -23,6 +23,27 @@ log after each working session so the project history stays current.
 
 ---
 
+## 2026-11-24 — GMC Tracker removed from main
+**Done**
+- Deleted the GMC Tracker app (`app/`, `lib/`, `public/`, `supabase/`, `SOP.md`,
+  and the Next.js config/package files) from `main`, at the owner's request —
+  GMC Tracker is no longer in use.
+- Rewrote `README.md` to say the repo now holds Daybook and to point at the
+  branch the live app is built from (`claude/friendly-wright-7vw21q`).
+
+**Notes / decisions**
+- The owner chose to leave the old GMC data in the database: the `gmc_requests` table (283 rows) in
+  the Supabase project `gmc-tracker` is untouched. It is locked (no open access); it can be exported
+  or dropped later if wanted.
+- Daybook's own, newer progress log is on the live branch `claude/friendly-wright-7vw21q`.
+- Nothing was permanently destroyed: GMC Tracker is still in git history
+  (restore with `git revert` of this change, or check out an older commit).
+- Daybook is untouched; the live site deploys from its own branch, not `main`.
+- Vercel previews of changes to `main` will fail to build now, because `main`
+  no longer contains an app. That is expected.
+
+---
+
 ## 2026-11-17 — Reverted background pattern
 **Done**
 - Reverted PR #36 (tiled background pattern + corner logo watermark), at the
