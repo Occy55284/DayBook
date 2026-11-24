@@ -4,10 +4,12 @@ import {
   TRADING_DAYS, addDays, commissionSunday, formatWeekRange, fromKey,
   monthGrid, monthName, toKey, weekDays, weekStart,
 } from "@/lib/dates";
-import { lastLotBefore, lotText, suggestedCommission, weekNetBeforeSunday } from "@/lib/finance";
+import { allTimeNet, lastLotBefore, lotText, suggestedCommission, weekNetBeforeSunday } from "@/lib/finance";
+import { capitalSummary } from "@/lib/capital";
+import { lotStep } from "@/lib/lots";
 import { heatLevel, maxAbsOf } from "@/lib/heat";
 import Money from "./Money";
-import { useFmt } from "./Privacy";
+import { useFmt, usePrivacy } from "./Privacy";
 import BubbleView from "./BubbleView";
 import type { BubbleItem } from "./BubbleView";
 import TargetCard from "./TargetCard";
@@ -29,8 +31,9 @@ function sumPrefix(map: DayMap, prefix: string) {
 }
 
 export default function CalendarView() {
-  const { trades, lots, commissions, settings, setDay, setCommission, ready, failed, error, reload } = useData();
+  const { trades, lots, commissions, capital, settings, setDay, setCommission, ready, failed, error, reload } = useData();
   const { money, signed } = useFmt();
+  const privacy = usePrivacy();
   const today = new Date();
   const [mode, setMode] = useState<Mode>("week");
   // Start on this week (at the weekend that is the week that just ended, so you can add its commission).
@@ -483,6 +486,11 @@ export default function CalendarView() {
                   onKeyDown={(e) => e.key === "Enter" && save()}
                 />
                 {lotInvalid && <p className="neg amount-hint" role="alert">Enter a number above 0, e.g. 0.01</p>}
+                {capital.length > 0 && !privacy.hidden && (
+                  <p className="amount-hint muted">
+                    Your balance supports {lotText(lotStep(capitalSummary(capital, allTimeNet(trades, commissions)).balance).lot)} lots (0.01 per £1,000).
+                  </p>
+                )}
               </>
             ) : (
               <>

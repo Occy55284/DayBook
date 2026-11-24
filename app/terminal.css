@@ -137,3 +137,13 @@ body {
   .celebrate-bubbles { display: none; }
   .celebrate-card { animation: none; }
 }
+
+/* ---------- Lot size card ---------- */
+.lot-card .big { font-size: 46px; }
+.lot-card .big .pence { font-size: .38em; letter-spacing: .08em; text-transform: uppercase; }
+.lot-card .bar { margin-top: 14px; }
+.lot-card .big.masked { color: var(--muted); text-shadow: none; letter-spacing: .12em; }
+.lot-last { margin-top: 10px; }
+.lot-flag { display: inline-block; margin-top: 4px; padding: 3px 8px; border: 1px solid currentColor; border-radius: 3px; font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+.lot-flag.ok { color: var(--green); }
+.lot-flag.over { color: #f59e0b; box-shadow: 0 0 14px rgba(245, 158, 11, .25); }

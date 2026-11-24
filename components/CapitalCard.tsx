@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { realDays } from "@/lib/finance";
+import { allTimeNet } from "@/lib/finance";
 import { useData } from "./DataProvider";
 import CapitalView from "./CapitalView";
 import { usePrivacy } from "./Privacy";
@@ -11,7 +11,7 @@ const KEY = "daybook-hide-return";
 // A Hide / Show button keeps the figures off the screen while you share it. The choice is remembered on this device.
 export default function CapitalCard() {
   const { trades, commissions, capital, addCapital, removeCapital } = useData();
-  const net = Object.values(realDays(trades, commissions)).reduce((s, v) => s + v, 0);
+  const net = allTimeNet(trades, commissions);
   const privacy = usePrivacy();
 
   // `null` = the saved choice has not been read yet. Until then the card counts as hidden, so a

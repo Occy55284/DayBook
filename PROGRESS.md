@@ -2,6 +2,38 @@
 
 Newest entry first.
 
+## 2026-11-24 — Privacy mode, target celebration, lot size tracker
+**Done**
+- **Privacy mode:** a button at the top right of every signed-in screen. When on, every £ amount and
+  % return in the app is shown as dots (Calendar, bubbles, month grid, year, Analytics, target and
+  capital cards, the chart's target label, bubble aria-labels). The target card's % and progress bar
+  are masked too. Remembered on the device; starts masked until the saved choice is read, so numbers
+  never flash up. All formatting goes through `lib/privacy.ts` (`makeFmt`) and `useFmt()` in
+  `components/Privacy.tsx`; screens that used `money()` / `signed()` / `pctText()` now use `useFmt()`.
+  The Return card is also hidden by privacy mode (it keeps its own Hide button for when privacy is off).
+- **Target celebration:** the first time this month's profit (after commission) reaches the monthly
+  target, glowing bubbles float up and a "TARGET HIT" banner appears (no amounts shown). Once per
+  month per device (`daybook-celebrated-YYYY-MM` in the browser), fades after 9s, Escape or "Nice"
+  closes it, banner only for people who reduce motion. `components/TargetCelebration.tsx`.
+- **Lot size tracker:** rule is 0.01 lots per £1,000, whole steps only (`lib/lots.ts`). New card on
+  Analytics under Return on your money: recommended lot for the balance, progress bar to the next
+  £1,000 step, a countdown ("about 28 trading days at £25.51 a day, around Fri 25 Dec") and the last
+  lot traded, flagged amber if it is above what the balance supports. The day entry box also says
+  what the balance supports. Hidden by privacy mode.
+- 190 tests (was 161): privacy masking, celebration rules, lot rules and card text.
+
+**Decisions (owner chose these)**
+- Balance = everything in the account: own money + bonus + profit - withdrawals (the Return card's
+  "Account balance"). Average = the last 20 logged trading days, after the commission paid inside that
+  window. Whole steps only (£2,999.99 is still 0.02).
+
+**Notes**
+- Privacy mode hides amounts and %, not shapes: charts, bubble sizes, win/loss colours and lot sizes on
+  the calendar stay visible. Settings inputs and the entry box show real numbers when you open them.
+- The countdown counts Monday to Friday only (no bank holidays) and assumes you trade every trading day
+  at your recent average; it is an estimate. The current week's commission is not yet in the average.
+- No database changes in this entry.
+
 ## 2026-11-23 — Hide option for "Return on your money" + progress log tidy
 **Done**
 - The **Return on your money** card on Analytics has a **Hide / Show** button, for screen

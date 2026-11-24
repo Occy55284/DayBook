@@ -12,6 +12,7 @@ import { LoadError, Skeleton } from "./LoadState";
 import Money from "./Money";
 import { useFmt } from "./Privacy";
 import CapitalCard from "./CapitalCard";
+import LotCard from "./LotCard";
 import TargetCard from "./TargetCard";
 
 const cls = (n: number) => (n > 0 ? "pos" : n < 0 ? "neg" : "");
@@ -214,6 +215,8 @@ export default function AnalyticsView() {
       {mode === "month" && <TargetCard net={realNet} year={year} month={month} />}
 
       <CapitalCard />
+
+      <LotCard />
 
       {entries.length === 0 ? (
         <p className="soon">No trades in this period yet.</p>
