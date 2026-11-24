@@ -1,4 +1,5 @@
-import type { CapitalEntry, CapitalKind } from "./store";
+import { allTimeNet } from "./finance";
+import type { CapitalEntry, CapitalKind, Commissions, Trades } from "./store";
 
 export const CAPITAL_LABELS: Record<CapitalKind, string> = {
   start: "Starting balance",
@@ -37,3 +38,9 @@ export function capitalSummary(entries: CapitalEntry[], net: number): CapitalSum
 // Show a percentage like +24.5% or -3.2%.
 export const pctText = (n: number): string =>
   `${n < 0 ? "-" : "+"}${Math.abs(n).toLocaleString("en-GB", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+
+// The total value of the account: own money + bonus + everything made (after commission) - withdrawals.
+// null until some capital has been entered, because without a starting balance the total is unknown.
+export function accountBalance(entries: CapitalEntry[], trades: Trades, commissions: Commissions): number | null {
+  return entries.length === 0 ? null : capitalSummary(entries, allTimeNet(trades, commissions)).balance;
+}

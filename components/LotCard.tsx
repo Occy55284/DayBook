@@ -1,7 +1,6 @@
 "use client";
-import { capitalSummary } from "@/lib/capital";
+import { accountBalance } from "@/lib/capital";
 import { toKey } from "@/lib/dates";
-import { allTimeNet } from "@/lib/finance";
 import { lastLot, recentAverage } from "@/lib/lots";
 import { useData } from "./DataProvider";
 import LotView from "./LotView";
@@ -12,7 +11,7 @@ export default function LotCard() {
   const { trades, commissions, lots, capital } = useData();
   const { hidden } = usePrivacy();
   const today = new Date();
-  const balance = capital.length === 0 ? null : capitalSummary(capital, allTimeNet(trades, commissions)).balance;
+  const balance = accountBalance(capital, trades, commissions);
   return (
     <LotView
       balance={balance}
