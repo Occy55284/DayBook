@@ -91,3 +91,22 @@ export function pacePoints(running: { key: string; value: number }[], year: numb
   }
   return [...byX.entries()].sort((a, b) => a[0] - b[0]).map(([x, y]) => ({ x, y }));
 }
+
+// ---- Celebrating a hit target ----
+// Profit after commission for one calendar month (month 0 = January): trades in that month minus the
+// commission paid in it. This is the same figure as the Total P&L on the Month view.
+export function monthNet(
+  trades: Record<string, number>, commissions: Record<string, number>, year: number, month: number
+): number {
+  const prefix = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const sum = (m: Record<string, number>) => Object.entries(m).reduce((s, [k, v]) => (k.startsWith(prefix) ? s + v : s), 0);
+  return sum(trades) - sum(commissions);
+}
+
+// The name a month's celebration is remembered under on this device, so each month is celebrated once.
+export const celebrationKey = (year: number, month: number): string =>
+  `daybook-celebrated-${year}-${String(month + 1).padStart(2, "0")}`;
+
+// Celebrate when a target is set, this month's profit has reached it, and we have not celebrated this month yet.
+export const shouldCelebrate = (net: number, target: number | null, alreadyDone: boolean): boolean =>
+  target !== null && target > 0 && net >= target && !alreadyDone;

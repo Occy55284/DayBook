@@ -98,3 +98,52 @@ body {
 .eye-btn:hover, .eye-btn:focus-visible { color: var(--green); border-color: var(--green); }
 .eye-btn[aria-pressed="true"] { color: var(--green); }
 .capital-card .big.masked { color: var(--muted); text-shadow: none; letter-spacing: .12em; filter: none; }
+
+/* ---------- Privacy mode button (top right of the header) ---------- */
+.brand { position: relative; }
+.privacy-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 6px; padding: 9px 10px; border: 1px solid #17331f; border-radius: 3px; background: #070d12; color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
+.privacy-btn span { display: none; }
+@media (min-width: 420px) { .privacy-btn span { display: inline; } }
+.privacy-btn:hover, .privacy-btn:focus-visible { color: var(--green); border-color: var(--green); }
+.privacy-btn.on { color: var(--green); border-color: var(--green); box-shadow: 0 0 16px rgba(61, 255, 139, .35); background: rgba(61, 255, 139, .08); }
+
+/* In privacy mode the target bar shows no progress: a plain hatched strip */
+.bar.masked i { background: repeating-linear-gradient(90deg, rgba(111,154,130,.55) 0 7px, transparent 7px 11px); box-shadow: none; }
+
+/* ---------- Target celebration: bubbles float up and a small banner appears ---------- */
+.celebrate { position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden; }
+.celebrate-bubbles i {
+  position: absolute; bottom: -70px; left: var(--l); width: var(--s); height: var(--s); border-radius: 50%;
+  border: 1.5px solid rgba(var(--c), .9);
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.4), transparent 45%), rgba(var(--c), .12);
+  box-shadow: 0 0 18px rgba(var(--c), .55);
+  animation: celebrate-rise var(--d) ease-out var(--dl) 1 both;
+}
+@keyframes celebrate-rise {
+  0% { transform: translate(0, 0); opacity: 0; }
+  12% { opacity: 1; }
+  100% { transform: translate(var(--x), -112vh); opacity: 0; }
+}
+.celebrate-card {
+  pointer-events: auto; position: absolute; top: 22%; left: 50%; transform: translateX(-50%); width: min(86vw, 340px);
+  padding: 20px 20px 18px; text-align: center; background: linear-gradient(180deg, #0b1a13, #070d12);
+  border: 1px solid var(--green); border-radius: 4px; box-shadow: 0 0 40px rgba(61, 255, 139, .35), inset 0 0 30px rgba(61, 255, 139, .06);
+  animation: celebrate-pop .45s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+.celebrate-title { color: var(--green); font-size: 22px; font-weight: 800; letter-spacing: .14em; text-shadow: 0 0 20px rgba(61, 255, 139, .7); }
+.celebrate-card p { margin: 10px 0 14px; color: var(--text); font-size: 15px; line-height: 1.45; }
+@keyframes celebrate-pop { 0% { transform: translateX(-50%) scale(.7); opacity: 0; } 100% { transform: translateX(-50%) scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .celebrate-bubbles { display: none; }
+  .celebrate-card { animation: none; }
+}
+
+/* ---------- Lot size card ---------- */
+.lot-card .big { font-size: 46px; }
+.lot-card .big .pence { font-size: .38em; letter-spacing: .08em; text-transform: uppercase; }
+.lot-card .bar { margin-top: 14px; }
+.lot-card .big.masked { color: var(--muted); text-shadow: none; letter-spacing: .12em; }
+.lot-last { margin-top: 10px; }
+.lot-flag { display: inline-block; margin-top: 4px; padding: 3px 8px; border: 1px solid currentColor; border-radius: 3px; font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+.lot-flag.ok { color: var(--green); }
+.lot-flag.over { color: #f59e0b; box-shadow: 0 0 14px rgba(245, 158, 11, .25); }

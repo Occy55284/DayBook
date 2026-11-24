@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countTradingDays, monthTargetProgress, pacePoints } from "../lib/target";
+import { celebrationKey, countTradingDays, monthNet, monthTargetProgress, pacePoints, shouldCelebrate } from "../lib/target";
 
 const d = (y: number, m: number, day: number) => new Date(y, m - 1, day);
 // November 2026: 1st is a Sunday, the 30th is a Monday. It has 21 trading days.
@@ -137,5 +137,30 @@ describe("pacePoints (running total laid out across the month's trading days)", 
   it("ignores days that are not in the month", () => {
     const p = nov([{ key: "2026-10-30", value: 999 }, { key: "2026-11-02", value: 5 }]);
     expect(p.map((q) => q.y)).toEqual([0, 5]);
+  });
+});
+
+describe("celebrating a hit target", () => {
+  it("monthNet is the month's trades minus the commission paid in that month", () => {
+    const trades = { "2026-10-30": 500, "2026-11-02": 100, "2026-11-03": -20, "2026-11-30": 50, "2026-12-01": 999 };
+    const comm = { "2026-11-08": 30, "2026-10-25": 400 };
+    expect(monthNet(trades, comm, 2026, 10)).toBe(100 - 20 + 50 - 30); // November only
+    expect(monthNet({}, {}, 2026, 10)).toBe(0);
+  });
+
+  it("each month has its own remembered key", () => {
+    expect(celebrationKey(2026, 10)).toBe("daybook-celebrated-2026-11");
+    expect(celebrationKey(2026, 0)).toBe("daybook-celebrated-2026-01");
+    expect(celebrationKey(2026, 11)).not.toBe(celebrationKey(2027, 11));
+  });
+
+  it("celebrates only when a target is set, it is reached, and it has not been celebrated yet", () => {
+    expect(shouldCelebrate(1000, 1000, false)).toBe(true);   // exactly on target counts
+    expect(shouldCelebrate(1250, 1000, false)).toBe(true);
+    expect(shouldCelebrate(999.99, 1000, false)).toBe(false);
+    expect(shouldCelebrate(1250, 1000, true)).toBe(false);   // already done this month
+    expect(shouldCelebrate(1250, null, false)).toBe(false);  // no target set
+    expect(shouldCelebrate(5, 0, false)).toBe(false);        // a zero target is not a target
+    expect(shouldCelebrate(-50, 1000, false)).toBe(false);
   });
 });

@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import type { CSSProperties } from "react";
 import { packBubbles } from "@/lib/bubbles";
 import { fromKey } from "@/lib/dates";
-import { money, signed } from "@/lib/format";
+import { useFmt } from "./Privacy";
 
 // Floating bubbles, one per item. Bigger bubble = bigger £ amount. Tap a bubble to open it.
 // The bubbles drift gently (switched off for people who ask their device for less motion).
@@ -25,6 +25,7 @@ export default function BubbleView({
   items, todayKey, onOpen, unitPx = 50, labelMinPx = 34,
   hint = "Bigger bubble = bigger £ amount. Tap a bubble to open that day.", emptyText = "No trades this month yet.",
 }: Props) {
+  const { money, signed } = useFmt();
   const sorted = useMemo(() => [...items].sort((a, b) => a.key.localeCompare(b.key)), [items]);
   // Sizes follow the £ amount; empty "ghost" bubbles use the smallest size.
   const packed = useMemo(() => packBubbles(sorted.map((e) => e.value ?? 0)), [sorted]);
@@ -57,7 +58,7 @@ export default function BubbleView({
               ? ghost ? `${label}, no commission entered yet. Add the commission.` : `${label}, commission of ${money(e.value!)}. Open it.`
               : ghost ? `${label}, no trade yet. Add a trade.` : `${label}, ${e.value! >= 0 ? "profit" : "loss"} of ${money(Math.abs(e.value!))}. Open this day.`;
           const dateText = kind === "commission" ? "Sun" : `${d.getDate()} ${d.toLocaleDateString("en-GB", { weekday: "short" })}`;
-          const amountText = ghost ? "＋" : kind === "commission" ? `-${e.value!.toFixed(2)}` : signed(e.value!);
+          const amountText = ghost ? "＋" : kind === "commission" ? signed(-e.value!) : signed(e.value!);
           return (
             <button
               key={e.key}

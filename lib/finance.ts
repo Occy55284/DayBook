@@ -34,3 +34,8 @@ export function lastLotBefore(lots: Lots, key: string): number | undefined {
 // Show a lot size like 0.01 or 0.025 (at least 2 decimals).
 export const lotText = (lot: number) =>
   lot.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+
+// Everything you have made, after commission, across all time.
+export function allTimeNet(trades: Trades, commissions: Commissions): number {
+  return Object.values(realDays(trades, commissions)).reduce((s, v) => s + v, 0);
+}

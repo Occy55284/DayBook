@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CAPITAL_LABELS, capitalSummary, pctText } from "@/lib/capital";
+import { CAPITAL_LABELS, capitalSummary } from "@/lib/capital";
 import { toKey } from "@/lib/dates";
-import { money } from "@/lib/format";
 import type { CapitalEntry, CapitalKind } from "@/lib/store";
+import { useFmt } from "./Privacy";
 
 const KINDS: CapitalKind[] = ["start", "deposit", "bonus", "withdrawal"];
 const cls = (n: number) => (n > 0 ? "pos" : n < 0 ? "neg" : "");
@@ -20,6 +20,7 @@ export default function CapitalView({ entries, net, today, onAdd, onRemove, hidd
   hidden?: boolean;
   onToggleHidden?: () => void;
 }) {
+  const { money, pct: pctText } = useFmt();
   const masked = hidden && entries.length > 0;
   const todayKey = toKey(today);
   const [adding, setAdding] = useState(false);
@@ -87,7 +88,7 @@ export default function CapitalView({ entries, net, today, onAdd, onRemove, hidd
         <>
           <div className="big masked" aria-hidden="true">••••••</div>
           <span className="sr-only">Hidden</span>
-          <span className="stat-sub">Hidden while you share your screen. Tap Show to see it.</span>
+          <span className="stat-sub">{onToggleHidden ? "Hidden while you share your screen. Tap Show to see it." : "Hidden by privacy mode. Turn it off at the top of the screen to see it."}</span>
         </>
       ) : (
         <>
